@@ -71,7 +71,7 @@ prompt ──▶ Clef (route + difficulty) ──▶ tabla id→modelo ──▶
 - **Umbral con caída segura:** si la confianza en `fast` es baja, usa el modelo grande.
 - **Métricas:** compara latencia y calidad frente a mandarlo todo al modelo grande.
 - **Más de dos destinos:** por ejemplo, rápido, grande, especialista en código y modelo de visión.
-- **Respeta la concurrencia:** Clef admite 2 peticiones a la vez y los modelos de chat tienen sus propios límites por modelo.
+- **Respeta la concurrencia:** Clef admite una petición a la vez por persona y los modelos de chat tienen sus propios límites por modelo.
 
 ## Errores comunes
 

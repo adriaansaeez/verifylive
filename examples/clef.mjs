@@ -1,10 +1,11 @@
 // Minimal Clef client for NaN (Node.js 18+, no dependencies).
 // Usage: NAN_KEY=... node clef.mjs
-// Retries immediately on 429 and caps concurrency at 2 in-flight requests.
+// Sends one request at a time (the per-person limit on NaN) and waits one second before retrying on 429.
 
 const URL = "https://api.nan.builders/v1/systemone";
 const MAX_RETRIES = 5;
-const MAX_CONCURRENCY = 2; // NaN allows at most 2 concurrent requests per person
+const MAX_CONCURRENCY = 1; // NaN allows one request at a time per person
+const TIMEOUT_MS = 50_000; // server-side timeout
 
 let inFlight = 0;
 const waiting = [];
@@ -23,9 +24,10 @@ export async function askClef(state, questions, model = "clef") {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ model, state, questions }),
+        signal: AbortSignal.timeout(TIMEOUT_MS),
       });
       if (res.status === 429 && attempt < MAX_RETRIES) {
-        await new Promise((r) => setTimeout(r, 200));
+        await new Promise((r) => setTimeout(r, 1000));
         continue;
       }
       if (!res.ok) throw new Error(`Clef HTTP ${res.status}: ${await res.text()}`);

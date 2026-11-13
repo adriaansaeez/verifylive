@@ -32,8 +32,8 @@ Usa la misma key de NaN que ya tienes para los modelos de chat. No necesitas nin
 | Campo | Tipo | Obligatorio | Descripción |
 |---|---|---|---|
 | `model` | string | sí | `"clef"` |
-| `state` | string | sí | El contexto que se evalúa: un ticket, un comando, una afirmación, una conversación… Hasta unos 16k tokens. |
-| `questions` | objeto | sí | Mapa `id → pregunta`. Los ids los eliges tú y te sirven para leer la respuesta. |
+| `state` | string | sí | El contexto que se evalúa: un ticket, un comando, una afirmación, una conversación… Hasta unos 16.000 tokens. Puede estar en español o en inglés. |
+| `questions` | objeto | sí | Mapa `id → pregunta`, hasta 64 por petición. Los ids los eliges tú y te sirven para leer la respuesta. |
 | `questions.<id>.type` | string | sí | `noul`, `choice` o `score` |
 | `questions.<id>.instructions` | string | sí | Qué quieres saber |
 | `questions.<id>.criteria` | objeto o lista | según el tipo | Las respuestas permitidas |
@@ -78,15 +78,50 @@ Clef da la probabilidad de que la respuesta sea "sí". No lleva `criteria`.
 
 ## Varias preguntas en una petición
 
-Puedes hacer varias preguntas sobre el mismo `state` en una sola petición. Es lo más eficiente: **mejor una petición con 5 preguntas que 5 peticiones**. Además consume menos de tu cupo de concurrencia (ver límites).
+Puedes hacer hasta 64 preguntas sobre el mismo `state` en una sola petición. Es lo más eficiente: **mejor una petición con 5 preguntas que 5 peticiones**. Es más rápido y, como solo puedes tener una petición en vuelo (ver límites), te evita hacer cola.
 
 ## Respuesta
 
-> **Pendiente de verificar.** El formato exacto del JSON de respuesta todavía no está documentado aquí. Lo que se sabe es que Clef devuelve, para cada id de `questions`, una respuesta tipada con probabilidades para cada valor permitido. Antes de escribir el parser, haz una llamada de prueba (ver [`examples/`](../examples/)) y mira la estructura real.
+Clef devuelve una respuesta por cada id de `questions`, dentro de `answers`, además del modelo usado y el consumo de tokens:
+
+```json
+{
+  "model": "clef",
+  "answers": {
+    "urgent": { "type": "noul", "noul": 0.94 },
+    "team": {
+      "type": "choice",
+      "choice": "technical",
+      "probabilities": { "billing": 0.04, "technical": 0.93, "sales": 0.03 },
+      "confidence": 0.9
+    },
+    "severity": {
+      "type": "score",
+      "score": 2.6,
+      "legend": { "0": "No impact", "1": "Minor", "2": "Major", "3": "Critical" },
+      "probabilities": { "...": 0.0 },
+      "confidence": 0.7
+    }
+  },
+  "usage": { "input_tokens": 182, "output_tokens": 0 }
+}
+```
+
+Los valores son ilustrativos.
+
+| Tipo | Campos | Cómo leerlo |
+|---|---|---|
+| `noul` | `noul` | Probabilidad de que la respuesta sea "sí", de 0 a 1 |
+| `choice` | `choice`, `probabilities`, `confidence` | `choice` es la opción más probable; `probabilities` da la probabilidad de cada opción (suman 1) |
+| `score` | `score`, `legend`, `probabilities`, `confidence` | `score` es la media de los niveles ponderada por su probabilidad: un número entre 0 (primer nivel) y N−1 (último), que puede caer entre dos niveles. `legend` relaciona cada índice con su nivel; `probabilities` da la probabilidad de cada nivel |
+
+`confidence` (de 0 a 1) indica lo seguro que está Clef, y se calcula a partir de las probabilidades. **Cuanto más claras y menos solapadas sean las opciones de `criteria`, más alta sale la `confidence`.**
+
+> Antes de escribir el parser, haz una llamada de prueba (ver [`examples/`](../examples/)) e imprime la respuesta completa, sobre todo para ver las claves de `probabilities` en `score`.
 
 ## Imágenes
 
-Clef tiene un codificador de visión y puede evaluar imágenes (Cloudflare indica hasta 4 por petición). Las imágenes cuentan para el límite de 4 MiB por petición.
+Clef tiene un codificador de visión y puede evaluar imágenes (Cloudflare indica hasta 4 por petición). Las imágenes cuentan para el límite de 4 MB por petición.
 
 > **Pendiente de verificar.** Esta guía aún no recoge cómo se adjuntan las imágenes en la petición.
 
@@ -94,27 +129,30 @@ Clef tiene un codificador de visión y puede evaluar imágenes (Cloudflare indic
 
 | Límite | Valor | Qué hacer |
 |---|---|---|
-| Concurrencia | **Máximo 2 peticiones a la vez por persona** | Si te pasas, recibes `429`. Reintenta al momento. |
-| Tamaño de la petición | **4 MiB**, imágenes incluidas | Comprime o redimensiona las imágenes |
-| Tamaño del estado | **unos 16k tokens** | Recorta o resume el contexto antes de enviarlo |
-| Latencia | **0,3–0,5 s** solo con texto; **1–2 s** con imágenes | Puedes llamar a Clef en el camino crítico de tu app |
+| Concurrencia | **Una petición a la vez por persona** | Si lanzas varias en paralelo recibes `429`. Haz las peticiones en serie; si te llega un `429`, espera un segundo y reintenta. |
+| Latencia | **Entre 0,1 y 2 s** por respuesta | Puedes llamar a Clef en el camino crítico de tu app |
+| Tamaño del estado | **Unos 16.000 tokens** | Recorta o resume el contexto antes de enviarlo |
+| Tamaño de la petición | **4 MB**, imágenes incluidas | Comprime o redimensiona las imágenes |
+| Preguntas | **Hasta 64 por petición** | Agrupa las preguntas sobre un mismo texto en una sola llamada: es más rápido que hacer una llamada por pregunta |
+| Timeout | **50 s** | Configura el timeout de tu cliente HTTP en 50 s o más |
 
 ## Errores
 
 | Código | Significado | Qué hacer |
 |---|---|---|
-| `401` | Key ausente o inválida | Revisa la cabecera `Authorization: Bearer …` |
-| `429` | Más de 2 peticiones simultáneas | Reintenta al momento. Limita tu app a 2 peticiones en vuelo. |
-| `413` / `400` | Petición demasiado grande o mal formada | Revisa el tamaño (4 MiB) y que el JSON sea válido, con comillas rectas `"` |
+| `400` | JSON mal formado | El mensaje de error dice qué falla. Revisa también que uses comillas rectas `"`. |
+| `404` | No tienes acceso | Revisa tu key y la cabecera `Authorization: Bearer …` |
+| `429` | Vas demasiado rápido: más de una petición a la vez | Espera un segundo y reintenta. Haz las peticiones en serie. |
+| `502` / `504` | Problema del servicio | Reintenta. Si sigue fallando, avisa en el canal del hackathon en Discord. |
 
-Los códigos `401`, `413` y `400` son las respuestas HTTP estándar. Fíate siempre del cuerpo del error que te devuelva la API.
+Fíate siempre del cuerpo del error que te devuelva la API.
 
 ## Buenas prácticas
 
 1. **Agrupa preguntas.** Una petición con todas las preguntas sobre el mismo estado.
-2. **Limita la concurrencia a 2.** Usa una cola o un semáforo en tu app, en lugar de lanzar decenas de peticiones en paralelo y comerte `429`.
-3. **Escribe `instructions` cortas y directas,** una sola pregunta por campo.
-4. **Haz descripciones de `criteria` que no se solapen.** Si dos opciones se parecen, Clef también dudará.
+2. **Una petición a la vez.** Pon las llamadas a Clef en una cola y hazlas en serie, en lugar de lanzarlas en paralelo y comerte `429`.
+3. **Escribe `instructions` concretas,** una sola pregunta por campo. Puedes escribirlas en español o en inglés.
+4. **Haz descripciones de `criteria` que no se solapen.** Si dos opciones se parecen, Clef también dudará. Cuanto más claras sean las opciones, más alta sale la `confidence`.
 5. **Usa las probabilidades.** No te quedes solo con la opción más probable. Define umbrales: por ejemplo, actúa si p(sí) > 0,9, pide confirmación si está entre 0,5 y 0,9 y bloquea en otro caso. Calibra esos umbrales con tus propios casos de prueba.
 6. **Pon en `state` solo lo relevante.** Menos ruido da mejores decisiones y menos latencia.
 7. **Clef decide, no redacta.** Si tu app necesita texto, pásale la decisión a un modelo de chat de NaN (`https://api.nan.builders/v1/chat/completions`).

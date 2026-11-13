@@ -3,8 +3,8 @@
 Usage:
     NAN_KEY=... python3 clef.py
 
-Retries immediately on 429 and caps concurrency at 2 in-flight requests,
-which is the per-person limit on NaN.
+Sends one request at a time (the per-person limit on NaN) and waits one
+second before retrying on 429.
 """
 
 import json
@@ -16,7 +16,8 @@ import urllib.request
 
 URL = "https://api.nan.builders/v1/systemone"
 MAX_RETRIES = 5
-_slots = threading.BoundedSemaphore(2)  # NaN allows at most 2 concurrent requests
+TIMEOUT_SECONDS = 50  # server-side timeout
+_slot = threading.Lock()  # NaN allows one request at a time per person
 
 
 def ask_clef(state: str, questions: dict, model: str = "clef") -> dict:
@@ -31,15 +32,15 @@ def ask_clef(state: str, questions: dict, model: str = "clef") -> dict:
             "Content-Type": "application/json",
         },
     )
-    with _slots:
+    with _slot:
         for attempt in range(1, MAX_RETRIES + 1):
             try:
-                with urllib.request.urlopen(request, timeout=30) as response:
+                with urllib.request.urlopen(request, timeout=TIMEOUT_SECONDS) as response:
                     return json.load(response)
             except urllib.error.HTTPError as err:
                 if err.code != 429 or attempt == MAX_RETRIES:
                     raise
-                time.sleep(0.2)
+                time.sleep(1)
     raise RuntimeError("unreachable")
 
 

@@ -63,11 +63,11 @@ afirmación ──▶ (opcional) recuperar evidencias ──▶ Clef (verdict + 
 
 - **Recuperación de evidencias** propia, con citas visibles en el resultado.
 - **Descomponer** afirmaciones compuestas en varias afirmaciones simples y verificar cada una, en una sola petición con varias preguntas.
-- **Imágenes:** verificar capturas de pantalla o gráficos. Revisa el límite de 4 MiB y la latencia de 1–2 s.
+- **Imágenes:** verificar capturas de pantalla o gráficos. Revisa el límite de 4 MB y que la latencia puede llegar a 2 s.
 - **Integración:** un bot de Discord o una extensión de navegador que verifique al vuelo.
 
 ## Errores comunes
 
 - Presentar el veredicto como certeza absoluta sin mirar la probabilidad.
 - No distinguir opiniones de hechos.
-- Pasar evidencias sin filtrar que superan los ~16k tokens de `state`.
+- Pasar evidencias sin filtrar que superan los ~16.000 tokens de `state`.

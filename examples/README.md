@@ -1,6 +1,6 @@
 # Ejemplos
 
-Todos los ejemplos leen tu key de la variable de entorno `NAN_KEY`, reintentan al recibir `429` y no superan 2 peticiones simultáneas.
+Todos los ejemplos leen tu key de la variable de entorno `NAN_KEY`, hacen una sola petición a la vez y, si reciben `429`, esperan un segundo y reintentan.
 
 | Fichero | Uso |
 |---|---|
