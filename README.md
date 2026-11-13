@@ -1,3 +1,5 @@
+![#2 Hackathon NaN: Decide con Clef](assets/banner.png)
+
 # #2 NaN Hackathon — Decide con Clef
 
 Documentación oficial para participantes del **#2 Hackathon de NaN**: cómo llamar a **Clef** desde NaN y la especificación de cada reto.
