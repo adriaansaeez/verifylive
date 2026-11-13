@@ -1,0 +1,17 @@
+{
+  "model": "clef",
+  "state": "Subject: Checkout broken. Since 10:00 every payment returns Error 502. Our store is losing sales.",
+  "questions": {
+    "urgent": { "type": "noul", "instructions": "Is this support request urgent?" },
+    "team": {
+      "type": "choice",
+      "instructions": "Which team should handle this request?",
+      "criteria": { "billing": "Payments and refunds", "technical": "Outages and errors", "sales": "Plans and upgrades" }
+    },
+    "severity": {
+      "type": "score",
+      "instructions": "How severe is the customer impact?",
+      "criteria": ["No impact", "Minor", "Major", "Critical"]
+    }
+  }
+}
