@@ -188,13 +188,24 @@ const NUMBER_WORDS: Record<string, number> = {
   cero: 0, dos: 2, tres: 3, cuatro: 4, cinco: 5, seis: 6, siete: 7, ocho: 8, nueve: 9,
   diez: 10, once: 11, doce: 12, trece: 13, catorce: 14, quince: 15,
   dieciseis: 16, "dieciséis": 16, diecisiete: 17, dieciocho: 18, diecinueve: 19,
+  un: 1, una: 1, uno: 1,
   veinte: 20, veintiuno: 21, "veintiún": 21, "veintiuna": 21,
   veintidos: 22, "veintidós": 22, veintitres: 23, "veintitrés": 23, veinticuatro: 24,
   veinticinco: 25, veintiseis: 26, "veintiséis": 26, veintisiete: 27,
   veintiocho: 28, veintinueve: 29,
   treinta: 30, cuarenta: 40, cincuenta: 50, sesenta: 60, setenta: 70, ochenta: 80, noventa: 90,
-  cien: 100, ciento: 100, doscientos: 200, trescientos: 300, cuatrocientos: 400,
-  quinientos: 500, seiscientos: 600, setecientos: 700, ochocientos: 800, novecientos: 900,
+  cien: 100, ciento: 100,
+  // Las centenas concuerdan en género: "doscientas cuarenta mil familias".
+  // Sin las formas femeninas el barrido parte la cifra y "doscientas cuarenta
+  // mil" salía como 40.000, seis veces menos de lo que se dijo.
+  doscientos: 200, doscientas: 200,
+  trescientos: 300, trescientas: 300,
+  cuatrocientos: 400, cuatrocientas: 400,
+  quinientos: 500, quinientas: 500,
+  seiscientos: 600, seiscientas: 600,
+  setecientos: 700, setecientas: 700,
+  ochocientos: 800, ochocientas: 800,
+  novecientos: 900, novecientas: 900,
   mil: 1_000, millon: 1_000_000, "millón": 1_000_000, millones: 1_000_000,
 };
 
@@ -269,7 +280,8 @@ export function rewriteNumberWords(value: string): string {
       // "19000000000": keep the unit so the figure stays searchable.
       const last = words.at(-1);
       if ((last === "millones" || last === "millon") && number >= 1_000_000 && number % 1_000_000 === 0) {
-        return `${number / 1_000_000} millones`;
+        const millions = number / 1_000_000;
+        return `${millions} ${millions === 1 ? "millón" : "millones"}`;
       }
       return String(number);
     })

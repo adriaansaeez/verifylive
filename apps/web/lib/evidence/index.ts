@@ -112,9 +112,23 @@ async function runConnector(name: string, work: () => Promise<EvidenceCandidate[
   }
 }
 
+export type EvidenceOptions = {
+  mode: ClefMode;
+  /**
+   * Results already fetched while the claim was still being normalised.
+   * Searching cannot start until the canonicalizer produces its queries, and
+   * that call costs ~2.6 s, so the literal quote is searched in parallel and
+   * handed over here. The reranker and the anchor penalty decide what
+   * survives, exactly as with any other connector.
+   */
+  warmup?: Promise<WarmupResult> | null;
+};
+
+export type WarmupResult = { query: string; candidates: EvidenceCandidate[]; ms: number };
+
 export async function gatherEvidence(
   claim: { text: string; searchQueries: string[] },
-  options: { mode: ClefMode },
+  options: EvidenceOptions,
 ): Promise<EvidenceBundle> {
   const corpusEntry = matchCorpus(claim.text);
   const primaryQuery = claim.searchQueries[0] ?? claim.text;
@@ -159,15 +173,27 @@ export async function gatherEvidence(
       jobs.push(runConnector("jina", () => searchJina(primaryQuery)));
     }
 
+    if (options.warmup) {
+      jobs.push(
+        runConnector("websearch:warmup", async () => {
+          const warm = await options.warmup;
+          return warm?.candidates ?? [];
+        }),
+      );
+    }
+
     const settled = await Promise.all(jobs);
     for (const outcome of settled) {
       candidates.push(...outcome.candidates);
       // The provider that actually answered can differ from the one asked for,
-      // because the chain falls through when one returns nothing.
+      // because the chain falls through when one returns nothing. The warmup
+      // keeps its own name: which stage found a source is what the
+      // traceability panel is for.
       const answered = outcome.candidates.find((candidate) =>
         candidate.connector.startsWith("websearch:"),
       )?.connector;
-      const reportedName = outcome.name.startsWith("websearch:") && answered
+      const renameable = outcome.name.startsWith("websearch:") && outcome.name !== "websearch:warmup";
+      const reportedName = renameable && answered
         ? `${answered}${outcome.name.endsWith(":2") ? ":2" : ""}`
         : outcome.name;
       connectors.push({

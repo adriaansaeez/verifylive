@@ -94,3 +94,22 @@ describe("rewriteNumberWords", () => {
     expect(rewriteNumberWords("la paella es el mejor plato")).toBe("la paella es el mejor plato");
   });
 });
+
+describe("rewriteNumberWords con género", () => {
+  it("no parte una cifra por culpa de la concordancia femenina", () => {
+    // "doscientas cuarenta mil" salía como 40.000: seis veces menos de lo
+    // dicho, porque solo estaba la forma masculina y el barrido se partía.
+    expect(rewriteNumberWords("doscientas cuarenta mil familias")).toBe("240000 familias");
+    expect(rewriteNumberWords("trescientas mil personas")).toBe("300000 personas");
+    expect(rewriteNumberWords("quinientas mil viviendas")).toBe("500000 viviendas");
+  });
+
+  it("concuerda el singular de millón", () => {
+    expect(rewriteNumberWords("un millón de personas")).toBe("1 millón de personas");
+    expect(rewriteNumberWords("dos millones de euros")).toBe("2 millones de euros");
+  });
+
+  it("deja en paz un indefinido que no es una cantidad", () => {
+    expect(rewriteNumberWords("una de cada tres personas")).toBe("una de cada tres personas");
+  });
+});

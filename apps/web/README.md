@@ -101,6 +101,11 @@ scripts/probe-nan.ts      Diagnóstico de una llamada real a NaN/Clef
   cifra, fecha ni entidad («los servicios públicos empeoran») queda siempre
   como provisional, por mucha evidencia que la acompañe. Las que sí nombran
   algo («cada año se forman 240.000 familias») mantienen el veredicto firme.
+- **La búsqueda no espera al normalizador**: normalizar una cita cuesta ~2,6 s
+  y hasta entonces no hay consultas que lanzar, así que la cita literal se
+  busca en paralelo y sus resultados entran como un conector más. Medido A/B
+  sobre seis afirmaciones: la latencia baja de 5,3 s a 3,7 s de mediana y se
+  citan más fuentes, no menos. Se desactiva con `VERITAS_WARMUP_SEARCH=false`.
 - **Selección de fuentes**: el reranker semántico descarta por debajo de 0,3.
   Una fuente que responde a la afirmación puntúa entre 0,89 y 0,99, mientras que
   «Historia del ferrocarril en España» puntuaba 0,198 para una afirmación sobre
@@ -148,6 +153,7 @@ Sin `.env.local` la app arranca en modo simulado.
 | `VERITAS_SEARXNG_URL` | vacío | SearXNG autoalojado (`npm run search:up` lo deja en `http://localhost:8099`). Es el mejor buscador medido y no necesita claves. |
 | `VERITAS_SEARXNG_LANGUAGE` | `es` | Idioma que se le pide a SearXNG. |
 | `VERITAS_SEARXNG_RESULTS` | `8` | Resultados que se le piden por consulta. |
+| `VERITAS_WARMUP_SEARCH` | `true` | Busca la cita literal mientras se normaliza la afirmación. `false` lo desactiva. |
 | `VERITAS_SEARCH_PROVIDER` | auto | `auto`, `searxng`, `google`, `brave`, `bingnews`, `bing`, `gdelt` o `none`. `auto` usa SearXNG si está configurado, luego Google o Brave si hay clave, y si no `bingnews`. |
 | `GOOGLE_API_KEY` + `GOOGLE_CSE_ID` | vacío | Google Custom Search (API oficial, 100 consultas/día gratis). |
 | `BRAVE_SEARCH_API_KEY` | vacío | Brave Search API (2.000 consultas/mes gratis). |

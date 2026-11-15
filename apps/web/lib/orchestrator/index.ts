@@ -25,9 +25,11 @@ import { buildQueries, classifyCheckability } from "@/lib/claims/heuristic";
 import { ClaimWindow, type ClaimCandidate } from "@/lib/claims/claim-window";
 import { gateCandidates, runGate } from "@/lib/claims/gate";
 import { canonicalizeClaim, type CanonicalClaim } from "@/lib/claims/canonicalize";
-import { gatherEvidence } from "@/lib/evidence";
+import { gatherEvidence, type WarmupResult } from "@/lib/evidence";
+import { searchWeb } from "@/lib/evidence/websearch";
 import type {
   Claim,
+  ClefMode,
   DecisionRevision,
   Evidence,
   EvidenceCandidate,
@@ -87,6 +89,27 @@ function createLimiter(limit: number): <T>(work: () => Promise<T>) => Promise<T>
 }
 
 const limitEvidence = createLimiter(3);
+
+/**
+ * Searches the literal quote while the canonicalizer is still working. The
+ * result is shared by every claim the span yields, and a failure is swallowed:
+ * this is a head start, never a requirement.
+ */
+function startWarmupSearch(quote: string, mode: ClefMode): Promise<WarmupResult> | null {
+  if (mode !== "live") return null;
+  // An off switch for measuring, and for the day a provider misbehaves.
+  if (process.env.VERITAS_WARMUP_SEARCH === "false") return null;
+  const query = buildQueries(quote)[0];
+  if (!query) return null;
+  const started = Date.now();
+  const work = searchWeb(query)
+    .then((candidates) => ({ query, candidates, ms: Date.now() - started }))
+    .catch(() => ({ query, candidates: [], ms: Date.now() - started }));
+  // Nothing may await this before gatherEvidence does; an unhandled rejection
+  // here would take down the request.
+  void work;
+  return work;
+}
 
 const claimWindows = new Map<string, ClaimWindow>();
 
@@ -219,12 +242,18 @@ async function selectClaimCandidate(candidates: ClaimCandidate[]): Promise<Selec
   };
 }
 
-async function resolveClaim(claim: Claim, gate: GateDiagnostics | null): Promise<void> {
+async function resolveClaim(
+  claim: Claim,
+  gate: GateDiagnostics | null,
+  warmup: Promise<WarmupResult> | null,
+): Promise<void> {
   const config = runtimeConfig();
   const searching = updateClaimStatus(claim.id, "searching");
   if (searching) emit(claim.sessionId, { type: "claim.updated", claim: searching });
 
-  const bundle = await limitEvidence(() => gatherEvidence(claim, { mode: config.clefMode }));
+  const bundle = await limitEvidence(() =>
+    gatherEvidence(claim, { mode: config.clefMode, warmup }),
+  );
   const diagnostics: RevisionDiagnostics = {
     connectors: bundle.connectors,
     gate,
@@ -308,9 +337,13 @@ async function resolveClaim(claim: Claim, gate: GateDiagnostics | null): Promise
   }
 }
 
-async function analyze(claim: Claim, gate: GateDiagnostics | null): Promise<void> {
+async function analyze(
+  claim: Claim,
+  gate: GateDiagnostics | null,
+  warmup: Promise<WarmupResult> | null,
+): Promise<void> {
   try {
-    await resolveClaim(claim, gate);
+    await resolveClaim(claim, gate, warmup);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Error de análisis";
     const failed = updateClaimStatus(claim.id, "failed", { error: message, incrementAttempts: true });
@@ -318,8 +351,12 @@ async function analyze(claim: Claim, gate: GateDiagnostics | null): Promise<void
   }
 }
 
-export function analyzeClaim(claim: Claim, gate: GateDiagnostics | null = null): void {
-  const work = analyze(claim, gate);
+export function analyzeClaim(
+  claim: Claim,
+  gate: GateDiagnostics | null = null,
+  warmup: Promise<WarmupResult> | null = null,
+): void {
+  const work = analyze(claim, gate, warmup);
   track(claim.sessionId, work);
 }
 
@@ -381,6 +418,11 @@ export async function ingestSegment(input: SegmentInput): Promise<{
   if (selection) {
     const { candidate: selected, gate } = selection;
     const config = runtimeConfig();
+    // Normalising the quote costs ~2.6 s and nothing can be searched until it
+    // answers, so the literal quote goes to the search engine during that
+    // wait. Started before the await on purpose; the promise is handed to
+    // every claim this span produces.
+    const warmup = startWarmupSearch(selected.text, config.clefMode);
     const canonical = config.chatExtractor
       ? await canonicalizeClaim(selected.text, { spokenAtMs: selected.startMs, session })
       : [];
@@ -420,7 +462,7 @@ export async function ingestSegment(input: SegmentInput): Promise<{
       if (insertedClaim) {
         claims.push(insertedClaim);
         emit(session.id, { type: "claim.detected", claim: insertedClaim });
-        analyzeClaim(insertedClaim, gate);
+        analyzeClaim(insertedClaim, gate, warmup);
       }
     }
     window.consume(selected);
