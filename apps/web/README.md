@@ -86,6 +86,17 @@ scripts/probe-nan.ts      Diagnóstico de una llamada real a NaN/Clef
   claves. Es el resultado de medir todas las alternativas sin clave (ver
   «Elección del buscador»). Sin él, la app cae al RSS de Bing Noticias y sigue
   funcionando sin configurar nada.
+- **Quién publica**: el nivel de una fuente (primaria, medio de referencia u
+  otra) no sale de una lista fija de dominios: esa lista dejaba a La Razón,
+  Infobae o Las Provincias en el mismo cajón que un portal de empleo. Los
+  dominios que la lista no conoce se clasifican una vez con el modelo de chat
+  y se recuerdan en SQLite, con una lista de exclusión para lo que nunca es
+  periodismo. Medido sobre los 41 dominios que citaron las capturas reales:
+  98 % de acierto, 31 medios rescatados del cajón «otra».
+- **Nada se da por zanjado sin anclaje**: una afirmación que no cita ninguna
+  cifra, fecha ni entidad («los servicios públicos empeoran») queda siempre
+  como provisional, por mucha evidencia que la acompañe. Las que sí nombran
+  algo («cada año se forman 240.000 familias») mantienen el veredicto firme.
 - **Selección de fuentes**: el reranker semántico descarta por debajo de 0,3.
   Una fuente que responde a la afirmación puntúa entre 0,89 y 0,99, mientras que
   «Historia del ferrocarril en España» puntuaba 0,198 para una afirmación sobre
@@ -243,12 +254,14 @@ ruido. Los dos bancos llaman a NaN y a la red, así que `npm test` los salta:
 ```bash
 VERITAS_REPLAY=1 npx vitest run scripts/replay-detection.test.ts --disable-console-intercept
 VERITAS_REPLAY=1 npx vitest run scripts/replay-evidence.test.ts --disable-console-intercept
+VERITAS_REPLAY=1 npx vitest run scripts/replay-publishers.test.ts --disable-console-intercept
 ```
 
 El primero vuelve a pasar la transcripción por la ventana y el gate e imprime
 cada afirmación que publicaría, con sus probabilidades. El segundo lleva esas
 afirmaciones por el canonicalizador, los conectores y la política de veredictos,
-e imprime las fuentes que cita cada una. Son la referencia con la que se
+e imprime las fuentes que cita cada una. El tercero clasifica los dominios que
+citaron las capturas reales contra una clave de respuestas hecha a mano. Son la referencia con la que se
 calibraron los umbrales: sobre esa captura, la detección pasó de 3 afirmaciones
 (una de ellas cortada a mitad de frase) a unas 20, con las 6 afirmaciones
 contrastables de referencia encontradas.

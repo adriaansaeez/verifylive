@@ -1,4 +1,4 @@
-![Veritas Live](assets/banner.png)
+![Veritas Live verificando en directo el debate electoral de laSexta: a la izquierda el vídeo, en el centro la transcripción y a la derecha las afirmaciones con su veredicto y sus fuentes.](assets/banner.png)
 
 # Veritas Live
 

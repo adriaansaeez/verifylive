@@ -181,7 +181,13 @@ export async function classifyPublishers(
       resolved.set(host, "other");
       continue;
     }
-    const cached = store.get(host);
+    let cached: PublisherTier | null = null;
+    try {
+      cached = store.get(host);
+    } catch {
+      // A broken store is not a verdict about this host.
+      cached = null;
+    }
     if (cached) {
       resolved.set(host, cached);
       continue;
@@ -195,7 +201,13 @@ export async function classifyPublishers(
     const tier = await askModel(host);
     // An unanswered host stays "other" for this claim, but is NOT cached: a
     // transient failure must not permanently demote a real newspaper.
-    if (tier) store.set(host, tier);
+    if (tier) {
+      try {
+        store.set(host, tier);
+      } catch {
+        // Losing the cache write only costs one call next time.
+      }
+    }
     resolved.set(host, tier ?? "other");
   }
 

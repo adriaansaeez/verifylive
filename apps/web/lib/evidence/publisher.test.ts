@@ -156,3 +156,24 @@ describe("classifyPublishers", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });
+
+describe("tolerancia a fallos del almacén", () => {
+  it("sigue clasificando cuando la caché no se puede leer", async () => {
+    // "no such table: publishers" tras un cambio de esquema dejaba el claim
+    // entero en failed, cuando saber quién publica solo matiza el veredicto.
+    vi.stubEnv("NAN_KEY", "k");
+    vi.stubEnv("NAN_CHAT_MODEL", "m");
+    vi.stubGlobal("fetch", vi.fn(async () => answer("reliable_secondary")));
+    const broken: PublisherStore = {
+      get: () => {
+        throw new Error("no such table: publishers");
+      },
+      set: () => {
+        throw new Error("no such table: publishers");
+      },
+    };
+
+    const resolved = await classifyPublishers(["larazon.es"], broken);
+    expect(resolved.get("larazon.es")).toBe("reliable_secondary");
+  });
+});

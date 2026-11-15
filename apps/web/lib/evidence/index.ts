@@ -73,10 +73,19 @@ async function resolveTiers(candidates: EvidenceCandidate[]): Promise<EvidenceCa
     .filter((host): host is string => Boolean(host));
   if (unknown.length === 0) return candidates;
 
-  const tiers = await classifyPublishers(unknown, {
-    get: getPublisherTier,
-    set: setPublisherTier,
-  });
+  // Knowing who published something refines a verdict; it never produces one.
+  // A failure here used to take the whole claim down with it ("no such table:
+  // publishers" after a schema change left every analysis failed), so the
+  // worst case is now simply that a source keeps the tier it already had.
+  let tiers: Map<string, EvidenceCandidate["sourceTier"]>;
+  try {
+    tiers = await classifyPublishers(unknown, {
+      get: getPublisherTier,
+      set: setPublisherTier,
+    });
+  } catch {
+    return candidates;
+  }
 
   return candidates.map((candidate) => {
     if (candidate.sourceTier !== "other") return candidate;
