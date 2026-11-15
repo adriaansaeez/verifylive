@@ -1,9 +1,11 @@
 # Veritas Live
 
-Verificación de afirmaciones **en directo** sobre un discurso en español. La app
-escucha (micrófono real o un fixture pregrabado), extrae afirmaciones
-verificables, busca evidencia y muestra un veredicto con fuentes — sin inventar
-lo que no se puede comprobar.
+Documentación técnica. La idea del proyecto y para qué sirve están en el
+[README principal](../../README.md); aquí está cómo funciona por dentro, qué se
+midió y qué suele romperse.
+
+En una frase: escucha a alguien hablar, se queda con lo que se puede comprobar,
+lo busca y enseña el veredicto con sus fuentes, sin inventar lo que no sabe.
 
 ## Reglas de honestidad
 

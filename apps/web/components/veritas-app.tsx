@@ -141,9 +141,9 @@ export default function VeritasApp() {
               </span>
             </div>
             <p className="claims-sub">
-              Cada frase factual se contrasta con fuentes citables y se pondera con Clef. Sin evidencia
-              suficiente no hay veredicto concluyente: la confianza se rebaja y el resultado se marca como
-              provisional.
+              Una ficha por cada frase que se puede comprobar, con sus fuentes al lado. Cuando no dan para
+              zanjar el asunto, el veredicto sale marcado como provisional en vez de fingir una certeza que
+              no hay.
             </p>
 
             <div className="queue-strip">
@@ -227,18 +227,18 @@ function Setup({ session }: SetupProps) {
         <div>
           <p className="kicker">Verificación en directo</p>
           <h1>
-            Lo que se dice <em>en pantalla</em>, contrastado mientras se dice.
+            Que no te la <em>cuelen</em>.
           </h1>
           <p className="lede">
-            Veritas Live escucha el audio de una pestaña, transcribe en local y convierte cada afirmación
-            factual en una tarjeta con fuentes citables, nivel de confianza y aviso cuando la evidencia no
-            alcanza.
+            Pon un debate, un mitin o una entrevista. Veritas escucha, se queda con lo que de verdad se
+            puede comprobar y te enseña, mientras hablan, qué fuentes lo respaldan o lo desmienten. Con el
+            enlace, para que lo mires tú.
           </p>
           <ul className="principle-list">
-            <li>Audio e inferencia local: el modelo se descarga una vez y corre en tu máquina.</li>
-            <li>Cola secuencial para Clef: una llamada cada vez, con reintentos y timeout de 50 s.</li>
-            <li>La política de veredicto nunca deja que el modelo tenga la última palabra.</li>
-            <li>Todo el flujo funciona sin claves, con un evaluador simulado honesto.</li>
+            <li>Cuando no hay con qué comprobarlo, lo dice. No rellena huecos.</li>
+            <li>Distingue un dato de una opinión: «la sanidad va a peor» no entra.</li>
+            <li>Cada veredicto lleva debajo las fuentes con las que se tomó.</li>
+            <li>El audio no sale de tu ordenador: se transcribe aquí mismo.</li>
           </ul>
           <div className="setup-actions">
             <button
@@ -289,12 +289,12 @@ function Setup({ session }: SetupProps) {
           <p className="setup-note">
             {busy
               ? `${model.message || "Iniciando captura"}${model.stage === "loading" ? ` · ${Math.round(model.progress * 100)}%` : ""}`
-              : "Comparte una pestaña (no una ventana) y marca «Compartir audio». Sin esa casilla, pon el audio alto y usa el micrófono."}
+              : "Elige la pestaña del vídeo, no la ventana entera, y acuérdate de marcar «Compartir audio». Si no aparece esa casilla, sube el volumen y tira de micrófono."}
           </p>
         </div>
 
         <div className="panel checklist">
-          <h2>Preparación del entorno</h2>
+          <h2>Con qué está trabajando</h2>
           {config ? (
             <dl>
               <div className="check-row">

@@ -2,50 +2,109 @@
 
 # Veritas Live
 
-**Fact-check en directo para discursos en español, con Clef tomando la decisión.**
+**Que no te la cuelen.**
 
-Veritas Live escucha a alguien hablar —micrófono, pestaña del navegador o un
-discurso guionizado—, detecta afirmaciones verificables, busca evidencia pública
-y muestra en pantalla un veredicto con fuentes. La regla de producto es simple:
-**si no hay evidencia suficiente, lo dice; no rellena huecos.**
+Pon un debate, un mitin, una entrevista o cualquier vídeo donde alguien hable.
+Veritas lo escucha, separa lo que es una afirmación comprobable de lo que es
+ruido, la busca en prensa y en fuentes oficiales, y te enseña en pantalla, en el
+momento, si hay algo que la respalde o que la desmienta. Con el enlace, para que
+lo mires tú.
 
-> **#2 Hackathon NaN · Reto 3: fact-check.** La app implementa el reto completo y
-> añade la parte que lo convierte en experiencia: transcripción local en el navegador,
-> línea temporal en vivo, evidencia y contraevidencia visibles, y estados honestos
-> (`provisional`, `simulado`, `no verificable`).
+No hace falta que te fíes de nadie, ni de nosotros: cada veredicto lleva debajo
+las fuentes con las que se tomó.
+
+> **#2 Hackathon NaN · Reto 3: fact-check.** Implementa el reto completo y le
+> añade lo que lo convierte en algo usable: transcripción en tu propio
+> ordenador, línea de tiempo en vivo, fuentes a favor y en contra, y estados que
+> no se inventan nada.
 
 ---
 
-## El problema
+## La idea
 
-Un fact-checker conversacional tiene tres formas de mentir: inventar evidencia,
-confundir una opinión con un hecho y presentar una certeza que no existe. Veritas
-Live está diseñada alrededor de esas tres fallas:
+En un debate de hora y media se sueltan cifras a un ritmo que nadie puede
+comprobar sobre la marcha. Para cuando alguien verifica aquel «hemos
+multiplicado por veinte la inversión», el debate terminó hace tres días y el
+titular ya lo leyó todo el mundo.
 
-- **No inventa.** Si no hay fuentes, el veredicto es *no verificable*.
-- **No confunde.** Opiniones, preguntas, saludos y predicciones se conservan en
-  la transcripción, pero no abren búsqueda ni veredicto.
-- **No exagera.** Menos de dos medios distintos ⇒ badge **provisional**. Sin
-  `NAN_KEY` ⇒ todo se marca como **simulado**, nunca como si Clef hubiera
-  respondido.
+Veritas hace esa comprobación mientras la frase todavía está en el aire. No
+sustituye a un periodista: le quita de encima el trabajo mecánico de pillar la
+afirmación, buscarla y ponerle una fuente al lado.
 
-## Clef toma la decisión
+## Lo que NO hace
 
-Clef no escribe texto: recibe un **estado** (la afirmación + la evidencia
-numerada) y responde probabilidades para preguntas tipadas. Veritas Live le
-pregunta exactamente esto:
+Esto es lo que separa una herramienta útil de un juguete que da la razón al que
+lo usa.
 
-| `id` | Tipo | Pregunta | Decisión |
-|---|---|---|---|
-| `verdict` | `choice` | ¿Qué veredicto justifica **solo** la evidencia aportada? | `supported` · `contradicted` · `misleading` · `unverifiable` |
-| `is_checkable` | `noul` | ¿Es un hecho concreto y no opinión, predicción, broma o juicio de valor? | descarta lo opinable |
-| `evidence_quality` | `score` | ¿Qué fuerza y relevancia directa tiene la evidencia? | de `None` a `Primary and conclusive` |
-| `needs_more_sources` | `noul` | ¿Haría falta más o mejor evidencia para verificar con responsabilidad? | activa **provisional** |
+**No es una máquina de la verdad.** Un detector de mentiras que acierta siempre
+no existe, y el que diga tenerlo miente más que el político. Veritas no dice
+«esto es mentira»: dice «estas tres fuentes contradicen lo que acaba de decir»,
+y te las enseña.
 
-La instrucción prohíbe explícitamente responder con conocimiento externo: Clef
-solo puede usar la evidencia que se le entrega. La llamada va a
-`POST /v1/systemone` con `model: "clef"`, en una cola de **una petición en vuelo**
-con reintentos en `429`, `502` y `504` y timeout de 50 s.
+**No rellena huecos.** Si no encuentra con qué comprobar algo, lo marca como *no
+verificable* y se queda callado. Es la respuesta aburrida, y es la honesta.
+Preferimos quedarnos cortos a colar una certeza que no tenemos.
+
+**No confunde una opinión con un dato.** «La sanidad va a peor» no es
+comprobable, por mucho que se diga con énfasis. «Hemos invertido 19.000 millones
+desde 2026» sí lo es. Veritas solo entra al segundo tipo de frase, y lo decide
+preguntándole al modelo si dos periodistas con las mismas fuentes delante
+llegarían a la misma conclusión.
+
+**No te dice lo que quieres oír.** El veredicto sale de las fuentes, no de quién
+habla. Si la afirmación de tu partido está respaldada, lo dirá igual.
+
+## Qué ves en pantalla
+
+A la izquierda, lo que se está diciendo, transcrito en tu propio ordenador. A la
+derecha, una ficha por cada afirmación que merece comprobarse, con uno de estos
+cinco desenlaces:
+
+| Estado | Qué significa |
+|---|---|
+| **Respaldada** | Dos medios distintos o más sostienen lo que dijo |
+| **Contradicha** | Las fuentes dicen lo contrario |
+| **Engañosa** | El dato es cierto, pero falta un contexto que lo cambia todo |
+| **No verificable** | No hay con qué comprobarlo, o no era comprobable |
+| **Provisional** | Hay indicios, pero no para darlo por zanjado |
+
+**Provisional** es la etiqueta más importante de las cinco. Aparece cuando hay
+una sola fuente, cuando ninguna es un medio de referencia, o cuando la frase es
+demasiado vaga para resolverse en un sí o un no. Es la manera de no fingir
+certeza cuando no la hay.
+
+Un número correcto tampoco hace cierta toda la frase: si las fuentes confirman
+la cifra pero no el «récord histórico» que la acompaña, sale **engañosa**. Y una
+diferencia del 10 % o más entre lo dicho y lo publicado se corrige sola, sin que
+el modelo tenga voz.
+
+## Cómo decide, por dentro
+
+El veredicto no lo escribe un modelo de texto que pueda irse por las ramas. Lo
+decide **Clef**, que no redacta: recibe la afirmación con sus fuentes numeradas
+y responde con probabilidades a preguntas cerradas.
+
+Son estas cinco:
+
+| Pregunta a Clef | Para qué sirve |
+|---|---|
+| ¿Qué veredicto justifica **solo** la evidencia aportada? | elige entre respaldada, contradicha, engañosa y no verificable |
+| ¿Es un hecho concreto, y no una opinión, una predicción o un juicio de valor? | deja fuera lo opinable |
+| ¿Cuánta fuerza y relevancia directa tiene esta evidencia? | de «ninguna» a «primaria y concluyente» |
+| ¿Haría falta más o mejor evidencia para verificar esto con responsabilidad? | enciende el aviso de **provisional** |
+| ¿Dos periodistas con estas fuentes llegarían a la misma conclusión? | impide zanjar lo que depende de la interpretación |
+
+La instrucción le prohíbe tirar de lo que sabe: solo puede usar las fuentes que
+se le entregan. Si no bastan, tiene que decirlo.
+
+**Y Clef tampoco tiene la última palabra.** Por encima hay una política que
+rebaja el resultado cuando las fuentes no dan para tanto: menos de dos medios
+distintos, ninguna fuente de referencia, o una frase sin una sola cifra, fecha o
+nombre propio a la que agarrarse. El modelo propone; las reglas deciden qué se
+puede afirmar.
+
+Técnicamente: `POST /v1/systemone` con `model: "clef"`, en una cola de una
+petición en vuelo, con reintentos en `429`, `502` y `504` y timeout de 50 s.
 
 ## Flujo completo
 
@@ -80,20 +139,6 @@ con reintentos en `429`, `502` y `504` y timeout de 50 s.
 ```
 
 Detalle etapa por etapa, con entradas, salidas y archivos: **[docs/flujo.md](docs/flujo.md)**.
-
-## Los cinco desenlaces
-
-| Estado | Cuándo aparece | Ejemplo de la demo |
-|---|---|---|
-| **Respaldada** | ≥ 2 medios distintos y confianza alta | «En 2024 la selección española ganó la Eurocopa» |
-| **Contradicha** | La evidencia contradice el hecho | «La Tierra tiene una circunferencia de 400.000 km» (real: ~40.000) |
-| **Engañosa** | Una parte es cierta, falta el contexto | «España creó 500.000 empleos, un récord histórico» |
-| **No verificable** | Evidencia insuficiente, irrelevante o contradictoria; incluye opiniones | «La paella es, sin duda, el mejor plato del mundo» |
-| **Provisional** | Poca verificabilidad, evidencia débil o < 2 fuentes | «El agua hierve a cien grados» con una sola fuente |
-
-Un número correcto no hace cierta toda la frase: si las fuentes cubren la cifra
-pero no el superlativo, el veredicto es **engañosa**. Y una diferencia numérica
-del 10 % o más se corrige de forma determinista, sin depender del modelo.
 
 ## Decisiones de ingeniería que sostienen la demo
 
@@ -200,17 +245,24 @@ el gate; el segundo lleva las afirmaciones por canonicalizador, conectores y
 política. Sobre esa captura, la detección pasó de 3 afirmaciones (una cortada a
 mitad de frase) a ~20, incluyendo las 6 afirmaciones contrastables de referencia.
 
-## Límites conocidos
+## Hasta dónde llega, y hasta dónde no
 
-- **MVP local, no multi-tenant.** SQLite local, cuotas en memoria y token opcional;
-  pensado para demo y un solo proceso.
-- **Depende de WebGPU.** Navegador actualizado; la primera transcripción descarga
-  ~1,26 GB y prepara el modelo.
-- **Español.** El transcriptor y los prompts están ajustados a español.
-- **La calidad del veredicto depende de la evidencia recuperada.** Por eso
-  SearXNG es la opción recomendada y el reranker descarta fuentes débiles.
-- **Sin red** sigue funcionando con el fixture y el corpus, pero menos claims
-  reciben evidencia externa.
+Conviene saberlo antes de confiar en ninguna pantalla:
+
+- **Un veredicto vale lo que valgan sus fuentes.** Si el tema es muy reciente o
+  muy de nicho, no habrá con qué comprobarlo y saldrá *no verificable*. No es un
+  fallo: es el sistema negándose a inventar.
+- **El oído no es perfecto.** La transcripción se equivoca con nombres propios y
+  con cifras grandes dichas de corrido. Por eso cada ficha guarda la cita
+  literal: puedes ver qué se oyó exactamente.
+- **Va con retraso, aunque sea en directo.** Entre que se dice una frase y
+  aparece su ficha pasan unos segundos. Es el tiempo de oír, buscar y comprobar.
+- **Solo español**, de momento. El transcriptor y las preguntas están ajustados
+  a este idioma.
+- **Es un MVP de hackathon.** Base de datos local, un solo proceso, cuotas en
+  memoria. Vale para una demo o para ti; no para abrirlo a medio país.
+- **Sin internet** sigue funcionando con el discurso de ejemplo y su corpus,
+  pero casi nada recibe fuentes nuevas.
 
 ## Documentación
 

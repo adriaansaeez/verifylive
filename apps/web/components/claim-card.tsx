@@ -50,7 +50,7 @@ export default function ClaimCard({ claim, onOpen }: Props) {
         <p className="claim-summary">{resolved.summary}</p>
       ) : claim.status === "failed" ? (
         <p className="claim-summary">
-          {claim.error ?? "No se pudo completar la verificación de esta afirmación."}
+          {claim.error ?? "No se pudo comprobar esta frase."}
         </p>
       ) : (
         <div className="pending-block">
@@ -61,10 +61,10 @@ export default function ClaimCard({ claim, onOpen }: Props) {
           </span>
           <span>
             {claim.status === "searching"
-              ? "Recuperando fuentes citables…"
+              ? "Buscando quién lo ha publicado…"
               : claim.status === "evaluating"
-                ? "Clef está ponderando la evidencia…"
-                : "En cola de verificación…"}
+                ? "Comparando con lo que dicen las fuentes…"
+                : "En cola…"}
           </span>
         </div>
       )}

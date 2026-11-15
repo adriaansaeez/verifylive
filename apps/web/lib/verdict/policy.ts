@@ -32,20 +32,30 @@ export const VERDICT_LABELS: Record<Verdict, string> = {
 };
 
 export const VERDICT_SUMMARIES: Record<Verdict, string> = {
-  supported: "Las fuentes consultadas respaldan la afirmación.",
-  contradicted: "Las fuentes consultadas contradicen la afirmación.",
-  misleading: "Parte de la afirmación es cierta, pero el contexto cambia su significado.",
-  unverifiable: "No hay evidencia suficiente para confirmar ni refutar la afirmación.",
+  supported: "Lo que dijo coincide con lo que publican las fuentes.",
+  contradicted: "Las fuentes dicen lo contrario.",
+  misleading: "El dato es cierto, pero falta un contexto que cambia lo que da a entender.",
+  unverifiable: "No hay con qué comprobar esto, ni para bien ni para mal.",
 };
 
+function plural(count: number, one: string, many: string): string {
+  return `${count} ${count === 1 ? one : many}`;
+}
+
+/** Lo que el lector necesita para juzgar por su cuenta: cuántas fuentes, de
+ * cuántos medios distintos y de qué clase. */
 function sourceNote(evidence: EvidenceCandidate[]): string {
-  if (evidence.length === 0) return "Sin evidencia recuperada.";
+  if (evidence.length === 0) return "No se encontró ninguna fuente.";
+  const medios = distinctPublishers(evidence);
   const primary = evidence.filter((item) => item.sourceTier === "primary").length;
-  const secondary = evidence.filter((item) => item.sourceTier === "reliable_secondary").length;
-  const parts = [`${evidence.length} fuente(s) de ${distinctPublishers(evidence)} medio(s)`];
-  if (primary > 0) parts.push(`${primary} primaria(s)`);
-  if (secondary > 0) parts.push(`${secondary} secundaria(s) fiables`);
-  if (primary === 0) parts.push("sin fuente primaria");
+  const parts = [
+    `${plural(evidence.length, "fuente", "fuentes")} de ${plural(medios, "medio", "medios")}`,
+  ];
+  parts.push(
+    primary > 0
+      ? `${plural(primary, "oficial", "oficiales")}`
+      : "ninguna oficial",
+  );
   return `${parts.join(", ")}.`;
 }
 

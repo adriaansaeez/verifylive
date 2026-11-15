@@ -99,7 +99,7 @@ describe("applyVerdictPolicy", () => {
 
     expect(result.verdict).toBe("unverifiable");
     expect(result.provisional).toBe(true);
-    expect(result.rationale).toContain("1 medio(s)");
+    expect(result.rationale).toContain("1 medio");
   });
 
   it("preserves a strong supported verdict with a capped, non-provisional confidence", () => {
