@@ -85,6 +85,8 @@ export type ConnectorReport = {
 export type GateDiagnostics = {
   closed: number;
   factual: number;
+  /** Concreción por acuerdo entre observadores. */
+  precision?: number;
   score: number;
   consideredSpans: number;
 };
@@ -96,6 +98,8 @@ export type GateDiagnostics = {
 export type RevisionDiagnostics = {
   connectors: ConnectorReport[];
   gate: GateDiagnostics | null;
+  /** ¿Dos lectores con estas fuentes llegarían a lo mismo? */
+  settleable?: number;
   queries: string[];
   rerank: "nan" | "local";
   droppedByRerank: number;

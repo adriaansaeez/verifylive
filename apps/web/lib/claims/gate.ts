@@ -39,6 +39,17 @@ import { clamp01, fnv1a, tokenize } from "@/lib/text";
 export const GATE_MIN_CLOSED = 0.5;
 export const GATE_MIN_FACTUAL = 0.6;
 export const GATE_MIN_SCORE = 0.3;
+
+/**
+ * The gate deliberately does NOT judge precision.
+ *
+ * Measured: on a raw ASR span the question cannot tell rhetoric from a real
+ * claim, because the span still carries its framing. "creo también que es
+ * justo decir que el sistema ferroviario es un sistema seguro" scores 0.024
+ * and "los servicios públicos empeoran" scores 0.056, so filtering here lost
+ * two of the six reference claims. Precision is judged in the verdict
+ * instead, where the text has already been normalised.
+ */
 /** Below this gap two spans are equally good, so the longer one wins. */
 export const GATE_TIE_MARGIN = 0.2;
 
@@ -46,6 +57,12 @@ export type GateScore = {
   candidate: ClaimCandidate;
   closed: number;
   factual: number;
+  /** Does it name something definite? */
+  concrete: number;
+  /** Would two reporters with the same data reach the same conclusion? */
+  agreed: number;
+  /** concrete x agreed. */
+  precision: number;
   score: number;
 };
 
@@ -74,6 +91,26 @@ function factualQuestion(text: string): ClefQuestion {
   };
 }
 
+function concreteQuestion(text: string): ClefQuestion {
+  return {
+    type: "noul",
+    instructions:
+      `Fragmento «${text}». ¿Nombra sujeto, acción y objeto de forma lo bastante concreta como para buscarlo en una fuente? ` +
+      "Responde alto si dice quién hizo qué, o qué cantidad corresponde a qué cosa. " +
+      "Responde bajo si le falta el sujeto, le falta el dato, o es una frase general que podría aplicarse a casi cualquier contexto.",
+  };
+}
+
+function agreedQuestion(text: string): ClefQuestion {
+  return {
+    type: "noul",
+    instructions:
+      `Fragmento «${text}». Si dos periodistas con los mismos datos delante tuvieran que decidir si esto es verdadero o falso, ¿llegarían a la misma conclusión? ` +
+      "Responde alto cuando la frase afirma algo definido: una cantidad, una fecha, un acto concreto, algo que ocurrió o no ocurrió. " +
+      "Responde bajo cuando la respuesta dependería de la interpretación de cada uno, por tratarse de una valoración, una metáfora o una relación de causa discutible.",
+  };
+}
+
 /**
  * Candidates that can never be a claim are dropped before spending a Clef
  * call. Clef rates "Hablemos de los accidentes" (a proposal) as more factual
@@ -92,6 +129,10 @@ export function buildGateQuestions(candidates: ClaimCandidate[]): Record<string,
   for (const candidate of candidates) {
     questions[`${candidate.id}__closed`] = closedQuestion(candidate.text);
     questions[`${candidate.id}__factual`] = factualQuestion(candidate.text);
+    // Clef answers every question in one round trip, so these two cost about
+    // 150 ms over the whole call, not 150 ms per span.
+    questions[`${candidate.id}__concrete`] = concreteQuestion(candidate.text);
+    questions[`${candidate.id}__agreed`] = agreedQuestion(candidate.text);
   }
   return questions;
 }
@@ -121,7 +162,17 @@ export function scoreGate(
   return candidates.map((candidate) => {
     const closed = probability(map, `${candidate.id}__closed`);
     const factual = probability(map, `${candidate.id}__factual`);
-    return { candidate, closed, factual, score: closed * factual };
+    const concrete = probability(map, `${candidate.id}__concrete`);
+    const agreed = probability(map, `${candidate.id}__agreed`);
+    return {
+      candidate,
+      closed,
+      factual,
+      concrete,
+      agreed,
+      precision: concrete * agreed,
+      score: closed * factual,
+    };
   });
 }
 

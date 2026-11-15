@@ -101,6 +101,14 @@ scripts/probe-nan.ts      Diagnóstico de una llamada real a NaN/Clef
   cifra, fecha ni entidad («los servicios públicos empeoran») queda siempre
   como provisional, por mucha evidencia que la acompañe. Las que sí nombran
   algo («cada año se forman 240.000 familias») mantienen el veredicto firme.
+- **Acuerdo entre lectores**: Clef responde además si dos periodistas con esas
+  mismas fuentes delante llegarían a la misma conclusión. Sobre 26
+  afirmaciones dudosas etiquetadas a mano, esa pregunta separa la retórica del
+  hecho el 85 % de las veces, frente al 73 % de la señal de factualidad sola, y
+  sin perder ninguna afirmación real. Se pregunta sobre el texto ya
+  normalizado: probada en el gate, sobre el tramo crudo del ASR, la señal no
+  sobrevive al marco retórico («creo también que es justo decir que…») y
+  costaba dos de las seis afirmaciones de referencia.
 - **La búsqueda no espera al normalizador**: normalizar una cita cuesta ~2,6 s
   y hasta entonces no hay consultas que lanzar, así que la cita literal se
   busca en paralelo y sus resultados entran como un conector más. Medido A/B

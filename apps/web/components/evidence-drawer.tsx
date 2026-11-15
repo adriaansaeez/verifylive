@@ -184,8 +184,11 @@ export default function EvidenceDrawer({ claim, onClose }: Props) {
               {diagnostics.droppedByRerank > 0
                 ? `El reranker ${diagnostics.rerank === "nan" ? "semántico" : "local"} descartó ${plural(diagnostics.droppedByRerank, "fuente", "fuentes")} por no responder a la afirmación. `
                 : ""}
+              {diagnostics.settleable === undefined
+                ? ""
+                : `Acuerdo entre lectores: ${pct(diagnostics.settleable)}. `}
               {diagnostics.gate
-                ? `Detección: frase terminada ${pct(diagnostics.gate.closed)}, hecho contrastable ${pct(diagnostics.gate.factual)}, entre ${plural(diagnostics.gate.consideredSpans, "tramo candidato", "tramos candidatos")}.`
+                ? `Detección: frase terminada ${pct(diagnostics.gate.closed)}, hecho contrastable ${pct(diagnostics.gate.factual)}${diagnostics.gate.precision === undefined ? "" : `, precisión ${pct(diagnostics.gate.precision)}`}, entre ${plural(diagnostics.gate.consideredSpans, "tramo candidato", "tramos candidatos")}.`
                 : "Detección heurística, sin puntuación de Clef."}
             </p>
           </div>

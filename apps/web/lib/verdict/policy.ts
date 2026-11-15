@@ -56,6 +56,14 @@ const UNVETTED_SOURCE_CONFIDENCE = 0.6;
 const VAGUE_CLAIM_CONFIDENCE = 0.6;
 
 /**
+ * Below this, two reporters with the same sources would not agree, so the
+ * verdict cannot be presented as settled. Calibrated on 26 real borderline
+ * claims: the question separates rhetoric from fact 85% of the time against
+ * 73% for the factuality signal alone, and it keeps every real claim.
+ */
+const MIN_SETTLEABLE = 0.5;
+
+/**
  * A claim worth a firm verdict names something: a figure, a date or an entity.
  * With no claim text to read, the rule abstains rather than assuming the worst.
  */
@@ -123,6 +131,14 @@ export function applyVerdictPolicy(input: {
       confidence = Math.min(confidence, UNVETTED_SOURCE_CONFIDENCE);
       rationale = `${rationale} Ninguna fuente es primaria ni un medio de referencia, así que el veredicto queda provisional.`;
     }
+    // Clef's own read of whether this can be settled at all. It sees the
+    // sources, so it catches what the anchor rule cannot: "la deuda de España
+    // es cada día mayor" names an entity and still is not settleable.
+    if (clef.settleableProbability < MIN_SETTLEABLE) {
+      provisional = true;
+      confidence = Math.min(confidence, VAGUE_CLAIM_CONFIDENCE);
+      rationale = `${rationale} Dos lectores con estas mismas fuentes podrían discrepar, así que el veredicto queda provisional.`;
+    }
     // A claim with no figure, date or name is not precise enough to settle.
     // Measured on real captures: "los servicios públicos empeoran" and "tener
     // un trabajo ya no garantiza llegar a fin de mes" were being published as
@@ -179,6 +195,9 @@ export function applyVerdictPolicy(input: {
       : "",
     !isSpecificEnough(input.claimText ?? "")
       ? "Sin cifras, fechas ni entidades concretas, la afirmación no puede darse por zanjada."
+      : "",
+    clef.settleableProbability < MIN_SETTLEABLE
+      ? "Dos lectores con estas mismas fuentes podrían discrepar: veredicto provisional."
       : "",
   ].filter(Boolean).join(" ");
   const summary = `${VERDICT_SUMMARIES[verdict]} ${sourceNote(evidence)}${caveats ? ` ${caveats}` : ""}`.trim();

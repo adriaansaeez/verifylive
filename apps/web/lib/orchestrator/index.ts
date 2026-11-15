@@ -236,6 +236,7 @@ async function selectClaimCandidate(candidates: ClaimCandidate[]): Promise<Selec
     gate: {
       closed: Number(result.selected.closed.toFixed(3)),
       factual: Number(result.selected.factual.toFixed(3)),
+      precision: Number(result.selected.precision.toFixed(3)),
       score: Number(result.selected.score.toFixed(3)),
       consideredSpans: result.scores.length,
     },
@@ -278,6 +279,7 @@ async function resolveClaim(
       run: () => callClefWithRetry(state),
     });
     const parsed = parseClefResponse(raw);
+    diagnostics.settleable = Number(parsed.settleableProbability.toFixed(3));
     const decision = applyVerdictPolicy({
       clef: parsed,
       evidence: bundle.candidates,

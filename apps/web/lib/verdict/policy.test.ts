@@ -17,6 +17,7 @@ function clef(overrides: Partial<ParsedClef> = {}): ParsedClef {
     checkableProbability: 0.9,
     evidenceQualityScore: 3,
     needsMoreSourcesProbability: 0.1,
+      settleableProbability: 0.9,
     usage: null,
     raw: {},
     ...overrides,
@@ -203,6 +204,7 @@ describe("fuentes sin contrastar", () => {
       checkableProbability: 0.9,
       evidenceQualityScore: 3,
       needsMoreSourcesProbability: 0.2,
+      settleableProbability: 0.9,
       usage: undefined,
       raw: {},
       ...overrides,
@@ -264,6 +266,7 @@ describe("afirmaciones vagas", () => {
       checkableProbability: 0.9,
       evidenceQualityScore: 3,
       needsMoreSourcesProbability: 0.2,
+      settleableProbability: 0.9,
       usage: undefined,
       raw: {},
     };

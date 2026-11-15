@@ -20,6 +20,8 @@ export type ParsedClef = {
   checkableProbability: number;
   evidenceQualityScore: number;
   needsMoreSourcesProbability: number;
+  /** Would two reporters with these sources agree? */
+  settleableProbability: number;
   usage: ClefRawResponse["usage"];
   raw: ClefRawResponse;
 };
@@ -93,6 +95,11 @@ export function parseClefResponse(payload: ClefRawResponse): ParsedClef {
     checkableProbability: clamp01(numberFrom(recordFrom(answers.is_checkable).noul, 0)),
     evidenceQualityScore: Math.min(4, Math.max(0, qualityRaw)),
     needsMoreSourcesProbability: clamp01(needsMore),
+    // Absent in an older response: assume settleable rather than invent a
+    // caveat the model never expressed.
+    settleableProbability: clamp01(
+      numberFrom(recordFrom(answers.is_settleable).noul, 1),
+    ),
     usage: payload.usage,
     raw: payload,
   };
@@ -155,6 +162,18 @@ export function buildQuestions(): Record<string, ClefQuestion> {
     needs_more_sources: {
       type: "noul",
       instructions: "Would responsible verification require more or better sources?",
+    },
+    // Two observers with the same sources in front of them should reach the
+    // same answer. "Los servicios públicos empeoran" has evidence available
+    // and still fails this: deciding it would be a judgment call. Asked here,
+    // on the normalised claim, rather than in the gate, where the raw ASR
+    // span still carries its framing and the signal does not survive.
+    is_settleable: {
+      type: "noul",
+      instructions:
+        "If two reporters with these same sources had to decide whether this claim is true or false, would they reach the same conclusion? " +
+        "Answer high when the claim states something definite: a quantity, a date, a specific act, something that did or did not happen. " +
+        "Answer low when the answer would depend on each reporter's interpretation, because it is a value judgment, a metaphor or a disputable causal link.",
     },
   };
 }
