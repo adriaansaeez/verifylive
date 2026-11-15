@@ -13,11 +13,6 @@ lo mires tú.
 No hace falta que te fíes de nadie, ni de nosotros: cada veredicto lleva debajo
 las fuentes con las que se tomó.
 
-> **#2 Hackathon NaN · Reto 3: fact-check.** Implementa el reto completo y le
-> añade lo que lo convierte en algo usable: transcripción en tu propio
-> ordenador, línea de tiempo en vivo, fuentes a favor y en contra, y estados que
-> no se inventan nada.
-
 ---
 
 ## La idea
