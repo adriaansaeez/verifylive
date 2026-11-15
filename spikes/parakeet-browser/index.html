@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Veritas · Parakeet browser spike</title>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">VERITAS / HITO 0</p>
+        <h1>Parakeet local en navegador</h1>
+        <p class="lede">
+          Este harness valida descarga, caché, WebGPU y latencia sin enviar audio al servidor.
+        </p>
+      </header>
+
+      <section class="panel" aria-labelledby="compatibility-title">
+        <div class="section-heading">
+          <div>
+            <p class="step">01 · Diagnóstico</p>
+            <h2 id="compatibility-title">Compatibilidad</h2>
+          </div>
+          <span id="readiness-badge" class="badge pending">Comprobando</span>
+        </div>
+        <dl id="diagnostics" class="diagnostics"></dl>
+      </section>
+
+      <section class="panel" aria-labelledby="model-title">
+        <div class="section-heading">
+          <div>
+            <p class="step">02 · Preparación</p>
+            <h2 id="model-title">Modelo local</h2>
+          </div>
+          <label>
+            Precisión
+            <select id="quantization">
+              <option value="q8">q8 · compatible</option>
+              <option value="fp16">fp16 · shader-f16</option>
+            </select>
+          </label>
+        </div>
+        <p>
+          Parakeet TDT 0.6B v3. La variante fp16 descarga aproximadamente 1,26 GB; el navegador
+          conserva los pesos en OPFS para usos posteriores.
+        </p>
+        <div class="progress-row">
+          <progress id="model-progress" value="0" max="1"></progress>
+          <output id="model-progress-label">Sin descargar</output>
+        </div>
+        <div class="actions">
+          <button id="download-model" class="primary">Descargar y cargar</button>
+          <button id="cancel-download" disabled>Cancelar</button>
+          <button id="clear-cache" class="danger">Eliminar caché</button>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="file-title">
+        <div class="section-heading">
+          <div>
+            <p class="step">03 · Prueba reproducible</p>
+            <h2 id="file-title">Archivo de audio o vídeo</h2>
+          </div>
+        </div>
+        <input id="media-file" type="file" accept="audio/*,video/*" />
+        <div class="actions">
+          <button id="transcribe-file" class="primary" disabled>Transcribir archivo</button>
+          <button id="cancel-file" disabled>Cancelar</button>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="live-title">
+        <div class="section-heading">
+          <div>
+            <p class="step">04 · Directo</p>
+            <h2 id="live-title">Escuchar una pestaña</h2>
+          </div>
+          <span id="live-badge" class="badge">Detenido</span>
+        </div>
+        <p>
+          Selecciona una pestaña de Chrome y activa “Compartir audio”. El spike analiza una ventana
+          deslizante de 12 segundos cada 4 segundos y omite ciclos si el modelo no mantiene el ritmo.
+        </p>
+        <div class="actions">
+          <button id="start-live" class="primary" disabled>Escuchar pestaña</button>
+          <button id="stop-live" disabled>Detener</button>
+        </div>
+      </section>
+
+      <section class="panel results" aria-labelledby="results-title">
+        <div class="section-heading">
+          <div>
+            <p class="step">05 · Evidencia</p>
+            <h2 id="results-title">Resultados</h2>
+          </div>
+          <button id="export-results">Exportar JSON</button>
+        </div>
+        <div id="metrics" class="metric-grid"></div>
+        <h3>Transcripción</h3>
+        <ol id="segments" class="segments"></ol>
+        <h3>Registro</h3>
+        <pre id="event-log" class="event-log" aria-live="polite"></pre>
+      </section>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

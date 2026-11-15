@@ -1,0 +1,59 @@
+{
+  "id": "demo-2026",
+  "title": "Discurso de demostración · 90 segundos",
+  "language": "es",
+  "durationMs": 90000,
+  "notes": "Locución ficticia creada para el MVP. Contiene afirmaciones respaldadas, una contradicha, una engañosa, una opinión y una predicción.",
+  "segments": [
+    {
+      "startMs": 0,
+      "endMs": 6200,
+      "text": "Buenas noches. Quiero empezar con un dato que resume la situación: Madrid es la capital de España."
+    },
+    {
+      "startMs": 6200,
+      "endMs": 13800,
+      "text": "Y como todos saben, el agua hierve a cien grados Celsius al nivel del mar."
+    },
+    {
+      "startMs": 13800,
+      "endMs": 22600,
+      "text": "En 2024, la selección española ganó la Eurocopa y millones de personas salieron a celebrarlo."
+    },
+    {
+      "startMs": 22600,
+      "endMs": 31000,
+      "text": "La Tierra tiene una circunferencia de cuatrocientos mil kilómetros, exactamente."
+    },
+    {
+      "startMs": 31000,
+      "endMs": 40400,
+      "text": "El año pasado España creó quinientos mil empleos, un récord histórico."
+    },
+    {
+      "startMs": 40400,
+      "endMs": 49000,
+      "text": "La paella es, sin duda, el mejor plato del mundo."
+    },
+    {
+      "startMs": 49000,
+      "endMs": 60000,
+      "text": "En los próximos dos años, la inteligencia artificial destruirá el cincuenta por ciento de los empleos."
+    },
+    {
+      "startMs": 60000,
+      "endMs": 70000,
+      "text": "El monte Everest mide ocho mil ochocientos cuarenta y nueve metros."
+    },
+    {
+      "startMs": 70000,
+      "endMs": 81000,
+      "text": "La tasa de paro juvenil en España ronda el veintisiete por ciento."
+    },
+    {
+      "startMs": 81000,
+      "endMs": 90000,
+      "text": "Y por eso les pido su voto: juntos vamos a cambiar el país."
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+# SearXNG para Veritas Live.
+#
+# Metabuscador local: una petición consulta varios motores a la vez y devuelve
+# la URL del medio, un extracto real y la fecha, sin ninguna clave de API.
+# Medido con el reranker de NaN sobre ocho afirmaciones en español, encontró
+# una fuente relevante para las ocho (relevancia media 0,93) frente a 6/8 y
+# 0,66 del RSS de Bing Noticias, que es el respaldo sin Docker.
+#
+# No lo expongas a internet tal cual: `limiter: false` y el formato JSON
+# abierto están pensados para que la app los consuma en localhost.
+use_default_settings: true
+
+general:
+  instance_name: "Veritas Live"
+  # Sin métricas ni página de estadísticas: esto no es un servicio público.
+  enable_metrics: false
+
+server:
+  # Local únicamente. Si algún día se publica, cámbialo por un secreto real.
+  secret_key: "veritas-live-local-only-change-me"
+  limiter: false
+  public_instance: false
+  image_proxy: false
+
+search:
+  safe_search: 0
+  autocomplete: ""
+  default_lang: "es"
+  # El formato JSON viene desactivado de fábrica en SearXNG; es justo lo que
+  # la app necesita.
+  formats:
+    - html
+    - json
+
+ui:
+  infinite_scroll: false
+  query_in_title: true
+
+outgoing:
+  request_timeout: 5.0
+  max_request_timeout: 8.0
+  pool_connections: 50
+  pool_maxsize: 20
+
+engines:
+  # Los que respondieron de verdad desde un servidor en las pruebas.
+  - name: brave
+    disabled: false
+  - name: duckduckgo
+    disabled: false
+  - name: startpage
+    disabled: false
+  - name: mojeek
+    disabled: false
+  - name: wikipedia
+    disabled: false
+  - name: wikidata
+    disabled: false
+  # Estos suelen devolver "access denied" a una IP doméstica. Se quedan
+  # activos porque SearXNG tolera que un motor falle y porque desde otra red
+  # sí responden, pero no se cuenta con ellos.
+  - name: bing
+    disabled: false
+  - name: qwant
+    disabled: false
+  # Ruido para un verificador de hechos: comercio, redes y vídeo.
+  - name: amazon
+    disabled: true
+  - name: ebay
+    disabled: true
+  - name: youtube
+    disabled: true
+  - name: reddit
+    disabled: true
+  - name: pinterest
+    disabled: true

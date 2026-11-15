@@ -1,0 +1,343 @@
+{
+  "id": "youtube-rail",
+  "title": "Entrevista ferroviaria capturada desde pestaña de YouTube",
+  "note": "Salida real de Parakeet sobre la pestaña de Chrome. Banco de regresión para la detección de afirmaciones.",
+  "segments": [
+    {
+      "seq": 0,
+      "startMs": 69,
+      "endMs": 7062,
+      "text": "Es una cosa que es impensable, o sea que"
+    },
+    {
+      "seq": 1,
+      "startMs": 7395,
+      "endMs": 11062,
+      "text": "se repitan dos accidentes en menos de un año es insoportable"
+    },
+    {
+      "seq": 2,
+      "startMs": 9062,
+      "endMs": 15068,
+      "text": "Sí, es inasumible. Fíjate que, por ejemplo"
+    },
+    {
+      "seq": 3,
+      "startMs": 14285,
+      "endMs": 20065,
+      "text": "eh, en qué estamos, en qué estamos pensando y qué estamos haciendo, ¿no? Hoy en el Consejo de Ministros."
+    },
+    {
+      "seq": 4,
+      "startMs": 19973,
+      "endMs": 25062,
+      "text": "sí, pues por lo que estamos haciendo es negociar con los maquinistas pues coeficientes reductores de."
+    },
+    {
+      "seq": 5,
+      "startMs": 24930,
+      "endMs": 30066,
+      "text": "la seguridad social, mayores tiempos de descanso, también para los controles."
+    },
+    {
+      "seq": 6,
+      "startMs": 28066,
+      "endMs": 35063,
+      "text": "De descanso, también para los controladores del centro de operaciones que hay en Atocha."
+    },
+    {
+      "seq": 7,
+      "startMs": 33063,
+      "endMs": 40067,
+      "text": "Una auditoría extraordinaria de seguridad de la línea Madrid Sevilla y también un compromiso."
+    },
+    {
+      "seq": 8,
+      "startMs": 39413,
+      "endMs": 45064,
+      "text": "de dos mil veintiséis a dos mil treinta que en función de los criterios técnicos que nos han dicho vamos a"
+    },
+    {
+      "seq": 9,
+      "startMs": 44948,
+      "endMs": 50061,
+      "text": "invertir diecinueve cero millones de euros en el mantenimiento y la seguridad de las vías ferroviarias, ¿no? Por tanto."
+    },
+    {
+      "seq": 10,
+      "startMs": 48061,
+      "endMs": 54067,
+      "text": "De las vías ferroviarias. Por tanto, es evidente que tenemos que hacer más. Incluso también en el"
+    },
+    {
+      "seq": 11,
+      "startMs": 54866,
+      "endMs": 59064,
+      "text": "sistema ferroviario tenemos que incorporar elementos de seguridad de"
+    },
+    {
+      "seq": 12,
+      "startMs": 57064,
+      "endMs": 64061,
+      "text": "Hay otros sistemas que han sido positivos, por ejemplo, el transporte aéreo."
+    },
+    {
+      "seq": 13,
+      "startMs": 63729,
+      "endMs": 68067,
+      "text": "Por ejemplo, si cae un sistema operativo, como fue el caso de este."
+    },
+    {
+      "seq": 14,
+      "startMs": 71064,
+      "endMs": 78061,
+      "text": "veía a España como un, como un sobre todo Europa, como como un Primor, como algo espectacular, ¿no? digno de admiración."
+    },
+    {
+      "seq": 15,
+      "startMs": 77972,
+      "endMs": 82068,
+      "text": "Hablemos y tenemos que hacerlo. Y es un tema que no me gusta, pero evidentemente."
+    },
+    {
+      "seq": 16,
+      "startMs": 80068,
+      "endMs": 87064,
+      "text": "Hacerlo. Es un tema que no me gusta, pero evidentemente es una realidad. Hablemos de los accidentes que han sucedido."
+    },
+    {
+      "seq": 17,
+      "startMs": 85064,
+      "endMs": 92061,
+      "text": "Vamos primero a Adamud, cuando sucede, en ese momento."
+    },
+    {
+      "seq": 18,
+      "startMs": 91121,
+      "endMs": 96068,
+      "text": "por qué no hay una responsabilidad mayor? ¿Por qué no hay ya una disputación?"
+    },
+    {
+      "seq": 19,
+      "startMs": 94068,
+      "endMs": 101064,
+      "text": "Mayor, ¿por qué no hay ya una dimisión o un cese cuando hay un accidente mortal y unos?"
+    },
+    {
+      "seq": 20,
+      "startMs": 99064,
+      "endMs": 106061,
+      "text": "y y y un y unos avisos de eh los sindicatos ferroviarios de que faltaba mantenimiento de que se estaba sufriendo"
+    },
+    {
+      "seq": 21,
+      "startMs": 104061,
+      "endMs": 111065,
+      "text": "Que faltaba mantenimiento, de que se estaba subcontratando todo. Es decir, ya había algunas alertas de que, ojo, hay cosas que no están."
+    },
+    {
+      "seq": 22,
+      "startMs": 112797,
+      "endMs": 116062,
+      "text": "bien, porque no hay ningún tipo de."
+    },
+    {
+      "seq": 23,
+      "startMs": 114062,
+      "endMs": 121067,
+      "text": "las cosas las miras un poco a posterior y puedes decir efectivamente oye cualquier inversión fue insuficiente"
+    },
+    {
+      "seq": 24,
+      "startMs": 120284,
+      "endMs": 126063,
+      "text": "en la línea Madrid Sevilla no. Pero también es cierto que nosotros durante estos últimos ocho años hemos tenido"
+    },
+    {
+      "seq": 25,
+      "startMs": 126687,
+      "endMs": 131060,
+      "text": "que hacer tres cosas. La primera, hemos tenido que revertir la infradotación que había presupuestaria."
+    },
+    {
+      "seq": 26,
+      "startMs": 130490,
+      "endMs": 135067,
+      "text": "en la anterior administración oye que podía haber sido ya no digo por por compromiso político"
+    },
+    {
+      "seq": 27,
+      "startMs": 135691,
+      "endMs": 140063,
+      "text": "sino también por carestía de recursos públicos me refiero a la administración de Mariano Rajoy"
+    },
+    {
+      "seq": 28,
+      "startMs": 139335,
+      "endMs": 145060,
+      "text": "15 años hemos tardado en revertir esos recortes en lo que es la inversión en el sistema ferroviario."
+    },
+    {
+      "seq": 29,
+      "startMs": 144641,
+      "endMs": 149067,
+      "text": "Dos, bueno, hay muchos territorios en el país que lo que quieren es extender"
+    },
+    {
+      "seq": 30,
+      "startMs": 150413,
+      "endMs": 154064,
+      "text": "la línea de alta velocidad. Yo he inaugurado pues el ave madrid"
+    },
+    {
+      "seq": 31,
+      "startMs": 153299,
+      "endMs": 159060,
+      "text": "Ourense el ave madrid murcia bueno y tres el mantenimiento también de todas esas"
+    },
+    {
+      "seq": 32,
+      "startMs": 159463,
+      "endMs": 163067,
+      "text": "vías. Fíjate que se da la particularidad de que"
+    },
+    {
+      "seq": 33,
+      "startMs": 161067,
+      "endMs": 168064,
+      "text": "Eh, se da la particularidad de que en el eh, en la línea en la que se han concentrado los dos desgraciados accidentes ferroviarios, nosotros"
+    },
+    {
+      "seq": 34,
+      "startMs": 167710,
+      "endMs": 173060,
+      "text": "hemos multiplicado por veinte durante estos últimos ocho años por veinte la inversión."
+    },
+    {
+      "seq": 35,
+      "startMs": 172105,
+      "endMs": 177067,
+      "text": "Pues a lo mejor hacía falta por cuarenta, porque ha pasado es porque algo no se ha hecho nada."
+    },
+    {
+      "seq": 36,
+      "startMs": 175067,
+      "endMs": 182064,
+      "text": "En ocho años, ¿tú crees que la situación del tren es mejor eh?"
+    },
+    {
+      "seq": 37,
+      "startMs": 181140,
+      "endMs": 187060,
+      "text": "digamos que es mejor ahora que hace ocho años? retrasos, averías."
+    },
+    {
+      "seq": 38,
+      "startMs": 185060,
+      "endMs": 191067,
+      "text": "Ha habido una simultaneidad en cuanto al mantenimiento de un derecho fundamental."
+    },
+    {
+      "seq": 39,
+      "startMs": 190622,
+      "endMs": 196064,
+      "text": "que es el que se puede ser. Y no solo hablo de accidentes mortales, eh. Hablo de que la sensación no sensación, la realidad es que si tu"
+    },
+    {
+      "seq": 40,
+      "startMs": 196023,
+      "endMs": 201060,
+      "text": "ahora mismo hablas con muchas personas que utilizan el tren a diario en España, las averías son algo."
+    },
+    {
+      "seq": 41,
+      "startMs": 201395,
+      "endMs": 206065,
+      "text": "habitual, los retrasos son algo habitual, y esto no es serio. Sí, lo comparto."
+    },
+    {
+      "seq": 42,
+      "startMs": 205065,
+      "endMs": 211062,
+      "text": "comparto ese ese diagnóstico. Y además te digo, nosotros hemos estado eh simultaneando lo que es el hombre."
+    },
+    {
+      "seq": 43,
+      "startMs": 209062,
+      "endMs": 216066,
+      "text": "Nosotros hemos estado eh simultaneando lo que es la modernización del sistema ferroviario con la garantía de que mientras se hace esa modernización"
+    },
+    {
+      "seq": 44,
+      "startMs": 216865,
+      "endMs": 221063,
+      "text": "del sistema ferroviario mantenemos el servicio del derecho fundamental a la movilidad."
+    },
+    {
+      "seq": 45,
+      "startMs": 222061,
+      "endMs": 226059,
+      "text": "de los ciudadanos. Por tanto, eso ha implicado."
+    },
+    {
+      "seq": 46,
+      "startMs": 242066,
+      "endMs": 249063,
+      "text": "Que haya habido más incidencias, eso ha implicado también que haya habido más averiguas."
+    },
+    {
+      "seq": 47,
+      "startMs": 247063,
+      "endMs": 254059,
+      "text": "Que haya habido, bueno, pues más averías que nos han llevado bueno, pues a esta situación a la que tú comentas. Pero te diré."
+    },
+    {
+      "seq": 48,
+      "startMs": 253346,
+      "endMs": 258066,
+      "text": "también lo que hemos hecho con esto ha sido aumentar expulsiones."
+    },
+    {
+      "seq": 49,
+      "startMs": 256066,
+      "endMs": 263063,
+      "text": "Esto ha sido aumentar exponencialmente el uso por parte de los ciudadanos de la alta velocidad. También una rebaja."
+    },
+    {
+      "seq": 50,
+      "startMs": 262462,
+      "endMs": 268060,
+      "text": "sustantiva del precio de la alta velocidad del billete para los ciudadanos, y en consecuencia, hombre"
+    },
+    {
+      "seq": 51,
+      "startMs": 268312,
+      "endMs": 272066,
+      "text": "evidentemente tenemos dos problemas graves que tenemos que resolver entre"
+    },
+    {
+      "seq": 52,
+      "startMs": 270066,
+      "endMs": 277063,
+      "text": "graves que tenemos que resolver en términos de seguridad y de inversión, pero creo también que es justo decir que el sistema ferroviario"
+    },
+    {
+      "seq": 53,
+      "startMs": 277062,
+      "endMs": 282060,
+      "text": "en nuestro país, pese a las dificultades, es un sistema seguro. Creo que eso también desde el punto de vista"
+    },
+    {
+      "seq": 54,
+      "startMs": 285064,
+      "endMs": 292061,
+      "text": "Yo tengo invitados que he tenido que ahora mismo agarrar un billete de avión porque no quieren venir en agua."
+    },
+    {
+      "seq": 55,
+      "startMs": 290061,
+      "endMs": 297065,
+      "text": "Hay un tema que no tan solo es de datos."
+    }
+  ]
+}

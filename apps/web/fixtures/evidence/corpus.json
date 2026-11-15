@@ -1,0 +1,390 @@
+{
+  "version": 1,
+  "createdAt": "2026-11-14",
+  "notes": "Corpus reproducible del MVP. Los extractos resumen el contenido de cada fuente; las URL apuntan a la fuente pública. Sirve como respaldo obligatorio de la demo y como conjunto de evaluación de la política de veredicto.",
+  "entries": [
+    {
+      "id": "madrid-capital",
+      "claim": "Madrid es la capital de España",
+      "aliases": [
+        "Madrid es la capital de España",
+        "Madrid es la capital del Estado"
+      ],
+      "keywords": ["madrid", "capital", "espana"],
+      "expectedVerdict": "supported",
+      "rationale": "Hecho estable y ampliamente documentado.",
+      "evidence": [
+        {
+          "title": "Madrid",
+          "url": "https://es.wikipedia.org/wiki/Madrid",
+          "publisher": "Wikipedia en español",
+          "publishedAt": null,
+          "sourceTier": "reliable_secondary",
+          "stance": "supports",
+          "excerpt": "Madrid es un municipio y una ciudad de España. La localidad, con categoría histórica de villa, es la capital del Estado y de la Comunidad de Madrid."
+        }
+      ]
+    },
+    {
+      "id": "water-boils",
+      "claim": "El agua hierve a 100 grados Celsius al nivel del mar",
+      "aliases": [
+        "El agua hierve a cien grados Celsius al nivel del mar",
+        "El agua hierve a 100 °C a nivel del mar"
+      ],
+      "keywords": ["agua", "hierve", "cien", "grados", "nivel", "mar"],
+      "expectedVerdict": "supported",
+      "rationale": "Propiedad física documentada; el punto de ebullición depende de la presión.",
+      "evidence": [
+        {
+          "title": "Punto de ebullición",
+          "url": "https://es.wikipedia.org/wiki/Punto_de_ebullici%C3%B3n",
+          "publisher": "Wikipedia en español",
+          "publishedAt": null,
+          "sourceTier": "reliable_secondary",
+          "stance": "supports",
+          "excerpt": "El punto de ebullición del agua a una presión de una atmósfera, es decir, al nivel del mar, es de 100 °C (212 °F)."
+        }
+      ]
+    },
+    {
+      "id": "euro-2024",
+      "claim": "La selección española ganó la Eurocopa de 2024",
+      "aliases": [
+        "España ganó la Eurocopa en 2024",
+        "La selección española ganó la Eurocopa"
+      ],
+      "keywords": ["seleccion", "espanola", "gano", "eurocopa", "2024"],
+      "expectedVerdict": "supported",
+      "rationale": "Resultado deportivo oficial.",
+      "evidence": [
+        {
+          "title": "España campeona de la UEFA EURO 2024",
+          "url": "https://www.uefa.com/euro2024/news/",
+          "publisher": "UEFA",
+          "publishedAt": "2024-07-14",
+          "sourceTier": "primary",
+          "stance": "supports",
+          "excerpt": "España se proclamó campeona de la UEFA EURO 2024 al vencer 2-1 a Inglaterra en la final disputada en el Olympiastadion de Berlín el 14 de julio de 2024."
+        }
+      ]
+    },
+    {
+      "id": "earth-circumference",
+      "claim": "La Tierra tiene una circunferencia de 400.000 kilómetros",
+      "aliases": [
+        "La Tierra tiene una circunferencia de cuatrocientos mil kilómetros",
+        "La circunferencia de la Tierra es de 400.000 km"
+      ],
+      "keywords": ["tierra", "circunferencia", "cuatrocientos", "mil", "kilometros"],
+      "expectedVerdict": "contradicted",
+      "rationale": "La cifra correcta es de unos 40.075 km en el ecuador; el hablante multiplica por diez.",
+      "evidence": [
+        {
+          "title": "Earth Fact Sheet",
+          "url": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/earthfact.html",
+          "publisher": "NASA",
+          "publishedAt": null,
+          "sourceTier": "primary",
+          "stance": "contradicts",
+          "excerpt": "La circunferencia ecuatorial de la Tierra es de 40.075 kilómetros. La circunferencia polar es de 40.008 kilómetros."
+        }
+      ]
+    },
+    {
+      "id": "jobs-500k",
+      "claim": "España creó quinientos mil empleos el año pasado",
+      "aliases": [
+        "España creó 500.000 empleos el año pasado",
+        "El año pasado España creó quinientos mil empleos"
+      ],
+      "keywords": ["espana", "creo", "quinientos", "mil", "empleos", "ano", "pasado"],
+      "expectedVerdict": "misleading",
+      "rationale": "La cifra puede ser cierta, pero omitir la estacionalidad y la temporalidad cambia el significado material de la afirmación.",
+      "evidence": [
+        {
+          "title": "Encuesta de Población Activa, cuarto trimestre",
+          "url": "https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736176918",
+          "publisher": "INE",
+          "publishedAt": "2025-01-28",
+          "sourceTier": "primary",
+          "stance": "supports",
+          "excerpt": "La ocupación aumentó en torno a medio millón de personas en 2024, impulsada por el empleo temporal y la campaña turística."
+        },
+        {
+          "title": "Temporalidad y estacionalidad del empleo",
+          "url": "https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736176918",
+          "publisher": "INE",
+          "publishedAt": "2025-01-28",
+          "sourceTier": "primary",
+          "stance": "context",
+          "excerpt": "El empleo temporal y los contratos de corta duración explican una parte significativa del aumento; la tasa de temporalidad sigue por encima de la media europea."
+        }
+      ]
+    },
+    {
+      "id": "paella-opinion",
+      "claim": "La paella es el mejor plato del mundo",
+      "aliases": [
+        "La paella es, sin duda, el mejor plato del mundo"
+      ],
+      "keywords": ["paella", "mejor", "plato", "mundo"],
+      "expectedVerdict": "unverifiable",
+      "rationale": "Juicio de valor: no es una afirmación factual contrastable.",
+      "evidence": [
+        {
+          "title": "Paella",
+          "url": "https://es.wikipedia.org/wiki/Paella",
+          "publisher": "Wikipedia en español",
+          "publishedAt": null,
+          "sourceTier": "reliable_secondary",
+          "stance": "context",
+          "excerpt": "La paella es un plato de la gastronomía española a base de arroz y otros ingredientes, originario de la Comunidad Valenciana. Que sea el mejor del mundo es una valoración subjetiva."
+        }
+      ]
+    },
+    {
+      "id": "ai-jobs-prediction",
+      "claim": "La inteligencia artificial destruirá el 50 % de los empleos en dos años",
+      "aliases": [
+        "La inteligencia artificial destruirá el cincuenta por ciento de los empleos en dos años",
+        "La IA destruirá el 50 % de los empleos"
+      ],
+      "keywords": ["inteligencia", "artificial", "destruira", "cincuenta", "por", "ciento", "empleos"],
+      "expectedVerdict": "unverifiable",
+      "rationale": "Predicción a futuro; ninguna fuente puede confirmarla todavía.",
+      "evidence": [
+        {
+          "title": "Employment Outlook 2024",
+          "url": "https://www.oecd.org/employment/outlook/",
+          "publisher": "OCDE",
+          "publishedAt": "2024-07-09",
+          "sourceTier": "primary",
+          "stance": "context",
+          "excerpt": "Los estudios disponibles estiman una exposición parcial de las tareas a la automatización, pero no permiten sostener que la mitad del empleo desaparezca en dos años."
+        }
+      ]
+    },
+    {
+      "id": "everest-height",
+      "claim": "El monte Everest mide 8.849 metros",
+      "aliases": [
+        "El monte Everest mide ocho mil ochocientos cuarenta y nueve metros",
+        "El Everest mide 8.848,86 m"
+      ],
+      "keywords": ["monte", "everest", "ochocientos", "cuarenta", "nueve", "metros"],
+      "expectedVerdict": "supported",
+      "rationale": "Altitud oficial redondeada; la cifra más precisa es 8.848,86 m.",
+      "evidence": [
+        {
+          "title": "Monte Everest",
+          "url": "https://es.wikipedia.org/wiki/Monte_Everest",
+          "publisher": "Wikipedia en español",
+          "publishedAt": null,
+          "sourceTier": "reliable_secondary",
+          "stance": "supports",
+          "excerpt": "El monte Everest, en la cordillera del Himalaya, tiene una altitud de 8.848,86 metros sobre el nivel del mar, según la medición conjunta de China y Nepal de 2020."
+        }
+      ]
+    },
+    {
+      "id": "youth-unemployment-27",
+      "claim": "La tasa de paro juvenil en España ronda el 27 %",
+      "aliases": [
+        "La tasa de paro juvenil en España ronda el veintisiete por ciento",
+        "El paro juvenil en España está en torno al 27 %"
+      ],
+      "keywords": ["tasa", "paro", "juvenil", "espana", "veintisiete"],
+      "expectedVerdict": "supported",
+      "rationale": "Dato estadístico publicado por Eurostat para menores de 25 años.",
+      "evidence": [
+        {
+          "title": "Unemployment statistics",
+          "url": "https://ec.europa.eu/eurostat/statistics-explained/index.php/Unemployment_statistics",
+          "publisher": "Eurostat",
+          "publishedAt": "2024-11-01",
+          "sourceTier": "primary",
+          "stance": "supports",
+          "excerpt": "La tasa de desempleo de los menores de 25 años en España se situó en torno al 27 % en 2024, una de las más altas de la Unión Europea."
+        }
+      ]
+    },
+    {
+      "id": "openai-founded",
+      "claim": "OpenAI se fundó en 2015",
+      "aliases": ["OpenAI fue fundada en 2015", "OpenAI se fundó en diciembre de 2015"],
+      "keywords": ["openai", "fundo", "fundada", "2015"],
+      "expectedVerdict": "supported",
+      "rationale": "Fecha de constitución documentada.",
+      "evidence": [
+        {
+          "title": "OpenAI",
+          "url": "https://es.wikipedia.org/wiki/OpenAI",
+          "publisher": "Wikipedia en español",
+          "publishedAt": null,
+          "sourceTier": "reliable_secondary",
+          "stance": "supports",
+          "excerpt": "OpenAI es una organización de investigación en inteligencia artificial fundada en diciembre de 2015 en San Francisco, California."
+        }
+      ]
+    },
+    {
+      "id": "sun-is-star",
+      "claim": "El Sol es una estrella",
+      "aliases": ["El Sol es la estrella del sistema solar"],
+      "keywords": ["sol", "estrella"],
+      "expectedVerdict": "supported",
+      "rationale": "Clasificación astronómica básica.",
+      "evidence": [
+        {
+          "title": "Our Sun",
+          "url": "https://science.nasa.gov/sun/",
+          "publisher": "NASA Science",
+          "publishedAt": null,
+          "sourceTier": "primary",
+          "stance": "supports",
+          "excerpt": "El Sol es una estrella de tipo espectral G2V, la estrella del centro del sistema solar y la fuente principal de energía de la Tierra."
+        }
+      ]
+    },
+    {
+      "id": "amazon-river",
+      "claim": "El Amazonas es el río más caudaloso del mundo",
+      "aliases": ["El río Amazonas es el más caudaloso del mundo"],
+      "keywords": ["amazonas", "rio", "caudaloso", "mundo"],
+      "expectedVerdict": "supported",
+      "rationale": "Consenso hidrográfico sobre su caudal.",
+      "evidence": [
+        {
+          "title": "Amazon River",
+          "url": "https://www.usgs.gov/special-topics/water-science-school/science/amazon-river",
+          "publisher": "USGS",
+          "publishedAt": null,
+          "sourceTier": "primary",
+          "stance": "supports",
+          "excerpt": "El Amazonas es el río más caudaloso del mundo: aporta aproximadamente el 20 % del agua dulce que llega a los océanos."
+        }
+      ]
+    },
+    {
+      "id": "messi-world-cup",
+      "claim": "Messi ganó el Mundial de 2022 con Argentina",
+      "aliases": [
+        "Lionel Messi ganó la Copa del Mundo de 2022 con Argentina",
+        "Argentina ganó el Mundial de 2022"
+      ],
+      "keywords": ["messi", "gano", "mundial", "2022", "argentina"],
+      "expectedVerdict": "supported",
+      "rationale": "Resultado oficial de la Copa Mundial de la FIFA 2022.",
+      "evidence": [
+        {
+          "title": "Argentina campeón del mundo",
+          "url": "https://www.fifa.com/es/tournaments/mens/worldcup/qatar2022",
+          "publisher": "FIFA",
+          "publishedAt": "2022-12-18",
+          "sourceTier": "primary",
+          "stance": "supports",
+          "excerpt": "Argentina ganó la Copa Mundial de la FIFA 2022 al vencer a Francia en la final del 18 de diciembre de 2022. Lionel Messi levantó el trofeo como capitán."
+        }
+      ]
+    },
+    {
+      "id": "youth-unemployment-80",
+      "claim": "El 80 % de los jóvenes españoles está en paro",
+      "aliases": [
+        "El ochenta por ciento de los jóvenes españoles está en paro",
+        "Ocho de cada diez jóvenes españoles están en paro"
+      ],
+      "keywords": ["ochenta", "jovenes", "espanoles", "paro"],
+      "expectedVerdict": "contradicted",
+      "rationale": "La tasa real ronda el 27 %, muy lejos del 80 %.",
+      "evidence": [
+        {
+          "title": "Unemployment statistics",
+          "url": "https://ec.europa.eu/eurostat/statistics-explained/index.php/Unemployment_statistics",
+          "publisher": "Eurostat",
+          "publishedAt": "2024-11-01",
+          "sourceTier": "primary",
+          "stance": "contradicts",
+          "excerpt": "La tasa de desempleo de los menores de 25 años en España se situó en torno al 27 % en 2024, no en el 80 %."
+        }
+      ]
+    },
+    {
+      "id": "barcelona-capital",
+      "claim": "Barcelona es la capital de España",
+      "aliases": ["La capital de España es Barcelona"],
+      "keywords": ["barcelona", "capital", "espana"],
+      "expectedVerdict": "contradicted",
+      "rationale": "La capital es Madrid; Barcelona es la capital de Cataluña.",
+      "evidence": [
+        {
+          "title": "Barcelona",
+          "url": "https://es.wikipedia.org/wiki/Barcelona",
+          "publisher": "Wikipedia en español",
+          "publishedAt": null,
+          "sourceTier": "reliable_secondary",
+          "stance": "contradicts",
+          "excerpt": "Barcelona es una ciudad española, capital de la comunidad autónoma de Cataluña. La capital del Estado es Madrid."
+        }
+      ]
+    },
+    {
+      "id": "flat-earth",
+      "claim": "La Tierra es plana",
+      "aliases": ["La Tierra tiene forma plana"],
+      "keywords": ["tierra", "plana"],
+      "expectedVerdict": "contradicted",
+      "rationale": "La forma de la Tierra está medida por geodesia y satélites.",
+      "evidence": [
+        {
+          "title": "Earth",
+          "url": "https://science.nasa.gov/earth/facts/",
+          "publisher": "NASA Science",
+          "publishedAt": null,
+          "sourceTier": "primary",
+          "stance": "contradicts",
+          "excerpt": "La Tierra es un esferoide oblato: su forma ha sido medida por satélites y geodesia. No es plana."
+        }
+      ]
+    },
+    {
+      "id": "climate-invention",
+      "claim": "El cambio climático es un invento",
+      "aliases": ["El cambio climático no existe", "El calentamiento global es un invento"],
+      "keywords": ["cambio", "climatico", "invento"],
+      "expectedVerdict": "contradicted",
+      "rationale": "El consenso científico atribuye el calentamiento observado a la influencia humana.",
+      "evidence": [
+        {
+          "title": "AR6 Synthesis Report",
+          "url": "https://www.ipcc.ch/report/ar6/syr/",
+          "publisher": "IPCC",
+          "publishedAt": "2023-03-20",
+          "sourceTier": "primary",
+          "stance": "contradicts",
+          "excerpt": "El calentamiento del sistema climático es inequívoco y la influencia humana es la causa dominante del calentamiento observado desde mediados del siglo XX."
+        }
+      ]
+    },
+    {
+      "id": "spain-tourists",
+      "claim": "España es el país con más turistas del mundo",
+      "aliases": ["España es el destino turístico más visitado del mundo"],
+      "keywords": ["espana", "pais", "turistas", "mundo"],
+      "expectedVerdict": "contradicted",
+      "rationale": "Francia recibe más visitantes internacionales; España ocupa el segundo lugar.",
+      "evidence": [
+        {
+          "title": "UN Tourism Barometer",
+          "url": "https://www.unwto.org/tourism-data/un-tourism-tourism-dashboard",
+          "publisher": "UN Tourism",
+          "publishedAt": "2025-01-20",
+          "sourceTier": "primary",
+          "stance": "contradicts",
+          "excerpt": "Francia fue el destino más visitado del mundo en 2024, por delante de España, que ocupó el segundo lugar."
+        }
+      ]
+    }
+  ]
+}
