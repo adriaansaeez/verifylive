@@ -51,9 +51,9 @@ habla. Si la afirmación de tu partido está respaldada, lo dirá igual.
 
 ## Qué ves en pantalla
 
-A la izquierda, lo que se está diciendo, transcrito en tu propio ordenador. A la
-derecha, una ficha por cada afirmación que merece comprobarse, con uno de estos
-cinco desenlaces:
+Arriba a la izquierda, el vídeo. Debajo, lo que se está diciendo, transcrito en
+tu propio ordenador. A la derecha, una ficha por cada afirmación que merece
+comprobarse, con uno de estos cinco desenlaces:
 
 | Estado | Qué significa |
 |---|---|
@@ -104,7 +104,8 @@ petición en vuelo, con reintentos en `429`, `502` y `504` y timeout de 50 s.
 ## Flujo completo
 
 ```text
-🎙️ micrófono / pestaña ─┐
+▶️ enlace de YouTube ───┐
+🎙️ micrófono / pestaña ─┤
                         ├─▶ Parakeet TDT 0.6B v3 (WebGPU, en el navegador)
 📼 fixture 90 s ────────┘        │  ventanas de 3–10 s que cierran en pausa
                                  ▼
@@ -155,6 +156,13 @@ Detalle etapa por etapa, con entradas, salidas y archivos: **[docs/flujo.md](doc
 - **Trazabilidad.** Cada veredicto guarda conectores, latencias, consultas,
   fuentes descartadas y probabilidades del gate. Una lista vacía de fuentes ya
   no se parece a un buscador caído.
+- **El vídeo suena donde se captura.** El audio de un iframe de otro origen no
+  se puede leer desde la página, así que el reproductor va incrustado y se
+  captura esta misma pestaña: el audio sigue sin salir del equipo. Eso obligó a
+  bajar COEP de `require-corp` a `credentialless` (ambos aíslan el origen, pero
+  el primero exige una cabecera que YouTube no manda) y a pedir la captura con
+  `preferCurrentTab`, porque con el selector completo es fácil compartir la
+  pestaña equivocada y entonces no llega ni un sonido.
 - **Correcciones sin borrar historia.** Cada evaluación queda como revisión
   numerada con confianza, calidad de evidencia y si fue provisional o simulada.
 
@@ -163,7 +171,7 @@ Detalle etapa por etapa, con entradas, salidas y archivos: **[docs/flujo.md](doc
 ```text
 apps/web/                 La aplicación (Next.js 16 + React 19 + TypeScript)
   app/api/                Rutas HTTP y SSE
-  components/             Timeline, tarjeta de claim, cajón de evidencia
+  components/             Vídeo, timeline, tarjeta de claim, cajón de evidencia
   lib/
     claims/               Ventana ASR, gate Clef, canonicalizador, anclas
     evidence/             Wikipedia, SearXNG, buscadores, Jina, rerank, SSRF
@@ -205,15 +213,28 @@ VERITAS_SEARXNG_URL=http://localhost:8099
 ```
 
 La app necesita COOP/COEP para WebGPU y `SharedArrayBuffer`; `next.config.ts`
-las añade. Si la sirves detrás de otro proxy, replícalas.
+las añade, con COEP en `credentialless` para que el reproductor incrustado
+cargue sin perder el aislamiento de origen. Si la sirves detrás de otro proxy,
+replícalas tal cual.
 
-## Demo
+## Cómo usarlo
 
-1. Abre http://localhost:3000.
-2. Pulsa **Ver demo guionizada** para reproducir el discurso de 90 s sin
-   micrófono, o usa micrófono/pestaña para audio real.
-3. Observa los cinco desenlaces: respaldada, contradicha, engañosa, opinión
-   (no verificable) y provisional.
+Abre http://localhost:3000 y elige por dónde entra el audio:
+
+| Opción | Para qué sirve |
+|---|---|
+| **Pegar un enlace de YouTube** | Un debate, un mitin, una entrevista. El vídeo se abre dentro de la app, junto a la transcripción y las fichas. |
+| **Compartir el audio de una pestaña** | Cualquier otra cosa que suene en el navegador: un directo, una radio, una videollamada. |
+| **Usar el micrófono** | Lo que se oiga en la sala. |
+| **Ver demo guionizada (90 s)** | Un discurso de ejemplo con su corpus, sin micrófono y sin red. |
+
+Con un enlace de YouTube, el vídeo se reproduce en la propia pestaña y Chrome
+pide permiso para compartirla con el audio marcado. Acéptalo: es así como el
+sonido llega al transcriptor **sin salir de tu ordenador**. Carga primero el
+vídeo, sitúalo donde te interese y pulsa entonces «Empezar a verificar».
+
+Mires lo que mires, verás los cinco desenlaces: respaldada, contradicha,
+engañosa, no verificable y provisional.
 
 Guion completo de 3 minutos: **[apps/web/docs/demo-script.md](apps/web/docs/demo-script.md)**.
 
@@ -225,7 +246,7 @@ npm run check      # tsc --noEmit + Vitest
 npm run probe:nan  # llama al endpoint real con el mismo contrato; sin NAN_KEY no llama
 ```
 
-Estado actual: **154 tests pasan, 3 se saltan** (los bancos de regresión con
+Estado actual: **171 tests pasan, 3 se saltan** (los bancos de regresión con
 captura real, que requieren red y `NAN_KEY`). Los replay tests se ejecutan
 explícitamente:
 
