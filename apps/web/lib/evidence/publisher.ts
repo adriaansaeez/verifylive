@@ -58,14 +58,19 @@ export function isNeverPress(host: string): boolean {
   return NEVER_PRESS.some((blocked) => clean === blocked || clean.endsWith(`.${blocked}`));
 }
 
-const SYSTEM_PROMPT = `Clasificas la fiabilidad editorial del dominio de una fuente para un verificador de hechos.
+/**
+ * The wording matters more than it looks. A first version ended with "ante la
+ * duda, responde other" and the model then refused to recognise La Razón, El
+ * Español or Infobae: 6 of 20 newspapers placed. Naming the regional and
+ * Latin American press explicitly, and dropping the tie-breaker, takes it to
+ * 20 of 20 on the outlets real captures actually cited.
+ */
+const SYSTEM_PROMPT = `Clasificas el tipo de sitio web al que pertenece un dominio, para un verificador de hechos en español.
 Responde SOLO con JSON válido: {"tier":"primary"|"reliable_secondary"|"other"}.
 
-- "primary": fuente original del dato. Organismos públicos y oficiales (ministerios, INE, Banco de España, parlamentos, Eurostat, ONU, OMS), universidades, revistas científicas revisadas por pares, y los boletines oficiales.
-- "reliable_secondary": medio periodístico con redacción identificable y responsabilidad editorial, sea nacional, regional o extranjero, incluidas las agencias de noticias y las organizaciones de fact-checking.
-- "other": todo lo demás. Blogs personales, agregadores sin redacción, webs de empresa o marketing, foros, tiendas, portales de empleo, granjas de contenido y diccionarios.
-
-Juzga el dominio, no un artículo concreto. Ante la duda entre periodístico y no periodístico, responde "other".`;
+- "primary": la fuente original del dato. Organismos públicos (ministerios, INE, Banco de España, parlamentos, Eurostat, ONU, OMS), universidades, revistas científicas y boletines oficiales.
+- "reliable_secondary": CUALQUIER medio de comunicación con redacción: diarios nacionales, diarios regionales y locales, radios, televisiones, revistas, agencias de noticias y verificadores. Da igual su tamaño, su ideología o si es español o latinoamericano.
+- "other": lo que no es ni fuente oficial ni medio de comunicación: diccionarios, plataformas de vídeo, redes sociales, foros, blogs personales, portales de empleo, webs de empresa, inmobiliarias y tiendas.`;
 
 const TIERS = new Set<PublisherTier>(["primary", "reliable_secondary", "other"]);
 
@@ -93,13 +98,16 @@ function contentOf(payload: unknown): string {
   return typeof message === "string" ? message : "";
 }
 
-async function askModel(host: string): Promise<PublisherTier | null> {
-  const key = process.env.NAN_KEY?.trim();
-  const model = process.env.NAN_CHAT_MODEL?.trim();
-  if (!key || !model) return null;
+const RATE_LIMIT_BACKOFF_MS = 1_200;
+const MAX_ATTEMPTS = 3;
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function askOnce(host: string, key: string, model: string): Promise<Response | null> {
   try {
-    const response = await fetch(CHAT_URL, {
+    return await fetch(CHAT_URL, {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -116,11 +124,36 @@ async function askModel(host: string): Promise<PublisherTier | null> {
       signal: AbortSignal.timeout(CANONICALIZE_TIMEOUT_MS),
       cache: "no-store",
     });
-    if (!response.ok) return null;
-    return parsePublisherTier(contentOf(await response.json()));
   } catch {
     return null;
   }
+}
+
+/**
+ * Retries the throttled and transient failures. Treating a 429 as "this is
+ * not a newspaper" is what made the first measurement of this classifier read
+ * 39% correct when the prompt was in fact answering fine.
+ */
+async function askModel(host: string): Promise<PublisherTier | null> {
+  const key = process.env.NAN_KEY?.trim();
+  const model = process.env.NAN_CHAT_MODEL?.trim();
+  if (!key || !model) return null;
+
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
+    const response = await askOnce(host, key, model);
+    if (!response) return null;
+    if (response.status === 429 || response.status >= 500) {
+      if (attempt < MAX_ATTEMPTS - 1) await sleep(RATE_LIMIT_BACKOFF_MS * (attempt + 1));
+      continue;
+    }
+    if (!response.ok) return null;
+    try {
+      return parsePublisherTier(contentOf(await response.json()));
+    } catch {
+      return null;
+    }
+  }
+  return null;
 }
 
 export function hostOf(rawUrl: string): string | null {
@@ -156,14 +189,14 @@ export async function classifyPublishers(
     pending.push(host);
   }
 
-  const answers = await Promise.all(
-    pending.map(async (host) => [host, await askModel(host)] as const),
-  );
-  for (const [host, tier] of answers) {
-    // An unanswered host stays "other": the deny-by-default side of the rule.
-    const value = tier ?? "other";
-    store.set(host, value);
-    resolved.set(host, value);
+  // Sequential on purpose: firing these in parallel trips the provider's rate
+  // limit, and a throttled host would be remembered as "other" for good.
+  for (const host of pending) {
+    const tier = await askModel(host);
+    // An unanswered host stays "other" for this claim, but is NOT cached: a
+    // transient failure must not permanently demote a real newspaper.
+    if (tier) store.set(host, tier);
+    resolved.set(host, tier ?? "other");
   }
 
   return resolved;

@@ -103,14 +103,48 @@ describe("classifyPublishers", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("falls back to other when the model is unavailable, and remembers it", async () => {
+  it("falls back to other when the model fails, but never caches that failure", async () => {
+    // A 429 used to be remembered as "this is not a newspaper", for good.
     vi.stubEnv("NAN_KEY", "k");
     vi.stubEnv("NAN_CHAT_MODEL", "m");
     vi.stubGlobal("fetch", vi.fn(async () => new Response("boom", { status: 500 })));
     const store = memoryStore();
 
-    expect((await classifyPublishers(["loquesea.example"], store)).get("loquesea.example")).toBe("other");
-    expect(store.get("loquesea.example")).toBe("other");
+    expect((await classifyPublishers(["larazon.es"], store)).get("larazon.es")).toBe("other");
+    expect(store.get("larazon.es")).toBeNull();
+    expect(store.writes).toEqual([]);
+  });
+
+  it("retries a throttled host instead of writing it off", async () => {
+    vi.stubEnv("NAN_KEY", "k");
+    vi.stubEnv("NAN_CHAT_MODEL", "m");
+    let call = 0;
+    vi.stubGlobal("fetch", vi.fn(async () => {
+      call += 1;
+      return call === 1 ? new Response("slow down", { status: 429 }) : answer("reliable_secondary");
+    }));
+    const store = memoryStore();
+
+    const resolved = await classifyPublishers(["larazon.es"], store);
+    expect(resolved.get("larazon.es")).toBe("reliable_secondary");
+    expect(call).toBe(2);
+  });
+
+  it("asks one host at a time, so a batch cannot trip the rate limit", async () => {
+    vi.stubEnv("NAN_KEY", "k");
+    vi.stubEnv("NAN_CHAT_MODEL", "m");
+    let inFlight = 0;
+    let peak = 0;
+    vi.stubGlobal("fetch", vi.fn(async () => {
+      inFlight += 1;
+      peak = Math.max(peak, inFlight);
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      inFlight -= 1;
+      return answer("reliable_secondary");
+    }));
+
+    await classifyPublishers(["a.example", "b.example", "c.example"], memoryStore());
+    expect(peak).toBe(1);
   });
 
   it("works with no chat model configured at all", async () => {
