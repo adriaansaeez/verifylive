@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { embedUrl, watchUrl, type YoutubeRef } from "@/lib/client/youtube";
 
 type Props = {
@@ -29,6 +29,23 @@ export default function YoutubeStage({ video, phase, onStart, onChange }: Props)
   useEffect(() => setOrigin(window.location.origin), []);
 
   const src = useMemo(() => embedUrl(video, origin), [video, origin]);
+
+  /**
+   * `credentialless` tiene que estar puesto ANTES de que el iframe empiece a
+   * cargar, o el aislamiento entre orígenes bloquea la petición y queda el
+   * recuadro roto. Por eso el `src` no se pasa como propiedad de React: se
+   * asigna aquí, después del atributo. Dejando que React ordenara las dos
+   * cosas, el reproductor no cargaba.
+   */
+  const attach = useCallback(
+    (el: HTMLIFrameElement | null) => {
+      frameRef.current = el;
+      if (!el || !src) return;
+      el.setAttribute("credentialless", "");
+      if (el.getAttribute("src") !== src) el.setAttribute("src", src);
+    },
+    [src],
+  );
   const live = phase === "live";
   const starting = phase === "starting" || phase === "finishing";
 
@@ -56,12 +73,10 @@ export default function YoutubeStage({ video, phase, onStart, onChange }: Props)
       <div className="stage-frame">
         {origin ? (
           <iframe
-            ref={frameRef}
-            src={src}
+            ref={attach}
             title="Vídeo que se está verificando"
             allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
             allowFullScreen
-            {...({ credentialless: "" } as Record<string, string>)}
           />
         ) : null}
       </div>
