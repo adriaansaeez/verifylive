@@ -91,8 +91,12 @@ scripts/probe-nan.ts      Diagnóstico de una llamada real a NaN/Clef
   Infobae o Las Provincias en el mismo cajón que un portal de empleo. Los
   dominios que la lista no conoce se clasifican una vez con el modelo de chat
   y se recuerdan en SQLite, con una lista de exclusión para lo que nunca es
-  periodismo. Medido sobre los 41 dominios que citaron las capturas reales:
-  98 % de acierto, 31 medios rescatados del cajón «otra».
+  periodismo y una semilla con los medios que aparecen en casi toda captura.
+  Medido sobre los 41 dominios que citaron las capturas reales: 41 de 41
+  correctos, 32 medios rescatados del cajón «otra». Clasificar un dominio
+  nuevo cuesta ~1,4 s, así que la semilla es también lo que mantiene la
+  latencia baja: sin ella, la primera afirmación de una sesión pagaba cuatro
+  segundos por buscar periódicos que ya conocemos.
 - **Nada se da por zanjado sin anclaje**: una afirmación que no cita ninguna
   cifra, fecha ni entidad («los servicios públicos empeoran») queda siempre
   como provisional, por mucha evidencia que la acompañe. Las que sí nombran

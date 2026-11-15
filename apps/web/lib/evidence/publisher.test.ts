@@ -75,14 +75,14 @@ describe("classifyPublishers", () => {
     vi.stubGlobal("fetch", fetchMock);
     const store = memoryStore();
 
-    const first = await classifyPublishers(["larazon.es", "www.larazon.es"], store);
-    expect(first.get("larazon.es")).toBe("reliable_secondary");
+    const first = await classifyPublishers(["diarionuevo.example", "www.diarionuevo.example"], store);
+    expect(first.get("diarionuevo.example")).toBe("reliable_secondary");
     expect(fetchMock).toHaveBeenCalledTimes(1);
 
-    const second = await classifyPublishers(["larazon.es"], store);
-    expect(second.get("larazon.es")).toBe("reliable_secondary");
+    const second = await classifyPublishers(["diarionuevo.example"], store);
+    expect(second.get("diarionuevo.example")).toBe("reliable_secondary");
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(store.writes).toEqual(["larazon.es"]);
+    expect(store.writes).toEqual(["diarionuevo.example"]);
   });
 
   it("answers from the store without calling anyone", async () => {
@@ -110,8 +110,8 @@ describe("classifyPublishers", () => {
     vi.stubGlobal("fetch", vi.fn(async () => new Response("boom", { status: 500 })));
     const store = memoryStore();
 
-    expect((await classifyPublishers(["larazon.es"], store)).get("larazon.es")).toBe("other");
-    expect(store.get("larazon.es")).toBeNull();
+    expect((await classifyPublishers(["diarionuevo.example"], store)).get("diarionuevo.example")).toBe("other");
+    expect(store.get("diarionuevo.example")).toBeNull();
     expect(store.writes).toEqual([]);
   });
 
@@ -125,12 +125,14 @@ describe("classifyPublishers", () => {
     }));
     const store = memoryStore();
 
-    const resolved = await classifyPublishers(["larazon.es"], store);
-    expect(resolved.get("larazon.es")).toBe("reliable_secondary");
+    const resolved = await classifyPublishers(["diarionuevo.example"], store);
+    expect(resolved.get("diarionuevo.example")).toBe("reliable_secondary");
     expect(call).toBe(2);
   });
 
-  it("asks one host at a time, so a batch cannot trip the rate limit", async () => {
+  it("bounds how many hosts it asks about at once", async () => {
+    // Unbounded trips the rate limit; one at a time made this the slowest
+    // stage of the pipeline at 1.4 s per domain.
     vi.stubEnv("NAN_KEY", "k");
     vi.stubEnv("NAN_CHAT_MODEL", "m");
     let inFlight = 0;
@@ -143,8 +145,24 @@ describe("classifyPublishers", () => {
       return answer("reliable_secondary");
     }));
 
-    await classifyPublishers(["a.example", "b.example", "c.example"], memoryStore());
-    expect(peak).toBe(1);
+    await classifyPublishers(
+      ["a.example", "b.example", "c.example", "d.example", "e.example"],
+      memoryStore(),
+    );
+    expect(peak).toBeGreaterThan(1);
+    expect(peak).toBeLessThanOrEqual(3);
+  });
+
+  it("answers a known outlet with no call at all", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const store = memoryStore();
+
+    const resolved = await classifyPublishers(["larazon.es", "www.rtve.es", "ine.es"], store);
+    expect(resolved.get("larazon.es")).toBe("reliable_secondary");
+    expect(resolved.get("rtve.es")).toBe("reliable_secondary");
+    expect(resolved.get("ine.es")).toBe("primary");
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("works with no chat model configured at all", async () => {
@@ -173,7 +191,7 @@ describe("tolerancia a fallos del almacén", () => {
       },
     };
 
-    const resolved = await classifyPublishers(["larazon.es"], broken);
-    expect(resolved.get("larazon.es")).toBe("reliable_secondary");
+    const resolved = await classifyPublishers(["diarionuevo.example"], broken);
+    expect(resolved.get("diarionuevo.example")).toBe("reliable_secondary");
   });
 });

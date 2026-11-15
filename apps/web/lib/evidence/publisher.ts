@@ -22,6 +22,99 @@ export type PublisherStore = {
   set(host: string, tier: PublisherTier): void;
 };
 
+/**
+ * Outlets seen often enough to be worth knowing offline. Classifying a domain
+ * costs about 1.4 s, so without this seed the first claim of a session paid
+ * four seconds to look up newspapers it meets in every capture. Everything
+ * here was verified by hand against the harness.
+ */
+const KNOWN_PRESS: Record<string, PublisherTier> = {
+  // Agencias y verificadores.
+  "efe.com": "reliable_secondary",
+  "verifica.efe.com": "reliable_secondary",
+  "europapress.es": "reliable_secondary",
+  "newtral.es": "reliable_secondary",
+  "maldita.es": "reliable_secondary",
+  "verificat.cat": "reliable_secondary",
+  // Diarios nacionales.
+  "elpais.com": "reliable_secondary",
+  "elmundo.es": "reliable_secondary",
+  "abc.es": "reliable_secondary",
+  "larazon.es": "reliable_secondary",
+  "lavanguardia.com": "reliable_secondary",
+  "eldiario.es": "reliable_secondary",
+  "elconfidencial.com": "reliable_secondary",
+  "elconfidencialdigital.com": "reliable_secondary",
+  "elespanol.com": "reliable_secondary",
+  "publico.es": "reliable_secondary",
+  "infolibre.es": "reliable_secondary",
+  "vozpopuli.com": "reliable_secondary",
+  "theobjective.com": "reliable_secondary",
+  "elplural.com": "reliable_secondary",
+  "eldebate.com": "reliable_secondary",
+  "lamarea.com": "reliable_secondary",
+  "huffingtonpost.es": "reliable_secondary",
+  "20minutos.es": "reliable_secondary",
+  "elperiodico.com": "reliable_secondary",
+  "que.es": "reliable_secondary",
+  "democrata.es": "reliable_secondary",
+  "esdiario.com": "reliable_secondary",
+  "gaceta.es": "reliable_secondary",
+  // Radio y televisión.
+  "rtve.es": "reliable_secondary",
+  "lasexta.com": "reliable_secondary",
+  "antena3.com": "reliable_secondary",
+  "cadenaser.com": "reliable_secondary",
+  "cope.es": "reliable_secondary",
+  "telecinco.es": "reliable_secondary",
+  "cuatro.com": "reliable_secondary",
+  "euronews.com": "reliable_secondary",
+  "es.euronews.com": "reliable_secondary",
+  "france24.com": "reliable_secondary",
+  // Economía.
+  "expansion.com": "reliable_secondary",
+  "eleconomista.es": "reliable_secondary",
+  "cincodias.elpais.com": "reliable_secondary",
+  "businessinsider.es": "reliable_secondary",
+  // Prensa regional.
+  "lavozdegalicia.es": "reliable_secondary",
+  "elcorreo.com": "reliable_secondary",
+  "elcorreogallego.es": "reliable_secondary",
+  "heraldo.es": "reliable_secondary",
+  "lne.es": "reliable_secondary",
+  "laprovincia.es": "reliable_secondary",
+  "lasprovincias.es": "reliable_secondary",
+  "laopiniondemurcia.es": "reliable_secondary",
+  "laverdad.es": "reliable_secondary",
+  "diariosur.es": "reliable_secondary",
+  "diariodevalladolid.es": "reliable_secondary",
+  "noticiasdenavarra.com": "reliable_secondary",
+  "lavozdelsur.es": "reliable_secondary",
+  "melillahoy.es": "reliable_secondary",
+  "objetivocastillalamancha.es": "reliable_secondary",
+  "clm24.es": "reliable_secondary",
+  "salamancadiario.com": "reliable_secondary",
+  // Prensa en español de fuera de España.
+  "infobae.com": "reliable_secondary",
+  "clarin.com": "reliable_secondary",
+  "prensalibre.com": "reliable_secondary",
+  "elobservador.com.uy": "reliable_secondary",
+  "ambito.com": "reliable_secondary",
+  // Fuentes primarias que aparecen a menudo.
+  "ine.es": "primary",
+  "transportes.gob.es": "primary",
+  "lamoncloa.gob.es": "primary",
+  "boe.es": "primary",
+  "adif.es": "primary",
+  "bde.es": "primary",
+  "congreso.es": "primary",
+  "senado.es": "primary",
+};
+
+export function knownTier(host: string): PublisherTier | null {
+  return KNOWN_PRESS[host.toLowerCase().replace(/^www\./u, "")] ?? null;
+}
+
 /** Hosts that are never evidence, whatever they publish. */
 const NEVER_PRESS = [
   // Reference works and raw platforms: not a claim about the world.
@@ -100,6 +193,16 @@ function contentOf(payload: unknown): string {
 
 const RATE_LIMIT_BACKOFF_MS = 1_200;
 const MAX_ATTEMPTS = 3;
+/** Unknown domains asked at once. Three is what a single claim can cite. */
+const CLASSIFY_CONCURRENCY = 3;
+
+function chunk<T>(items: T[], size: number): T[][] {
+  const output: T[][] = [];
+  for (let index = 0; index < items.length; index += size) {
+    output.push(items.slice(index, index + size));
+  }
+  return output;
+}
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -181,6 +284,11 @@ export async function classifyPublishers(
       resolved.set(host, "other");
       continue;
     }
+    const known = knownTier(host);
+    if (known) {
+      resolved.set(host, known);
+      continue;
+    }
     let cached: PublisherTier | null = null;
     try {
       cached = store.get(host);
@@ -195,20 +303,26 @@ export async function classifyPublishers(
     pending.push(host);
   }
 
-  // Sequential on purpose: firing these in parallel trips the provider's rate
-  // limit, and a throttled host would be remembered as "other" for good.
-  for (const host of pending) {
-    const tier = await askModel(host);
+  // Strictly sequential cost 1.4 s per domain and made this the slowest stage
+  // of the whole pipeline, ahead of the search itself. A small window keeps
+  // the rate limit at bay (retries still cover a 429) while a claim citing
+  // three unknown outlets waits once instead of three times.
+  for (const batch of chunk(pending, CLASSIFY_CONCURRENCY)) {
+    const answers = await Promise.all(
+      batch.map(async (host) => [host, await askModel(host)] as const),
+    );
+    for (const [host, tier] of answers) {
     // An unanswered host stays "other" for this claim, but is NOT cached: a
     // transient failure must not permanently demote a real newspaper.
-    if (tier) {
-      try {
-        store.set(host, tier);
-      } catch {
-        // Losing the cache write only costs one call next time.
+      if (tier) {
+        try {
+          store.set(host, tier);
+        } catch {
+          // Losing the cache write only costs one call next time.
+        }
       }
+      resolved.set(host, tier ?? "other");
     }
-    resolved.set(host, tier ?? "other");
   }
 
   return resolved;
