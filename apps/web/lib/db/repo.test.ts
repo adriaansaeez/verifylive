@@ -49,3 +49,32 @@ describe("closeStaleSessions", () => {
     expect(repo.getSession("ses_done")?.error).toBeNull();
   });
 });
+
+describe("migración de esquema en caliente", () => {
+  it("recupera una tabla que falta en una conexión ya abierta", async () => {
+    // Esto es lo que mató 18 análisis: el servidor cachea la conexión en
+    // globalThis, así que una tabla añadida después de arrancar no existía.
+    const repo = await import("@/lib/db/repo");
+    const { getDb } = await import("@/lib/db/client");
+
+    repo.setPublisherTier("elpais.com", "reliable_secondary");
+    const db = getDb();
+    db.exec("DROP TABLE publishers");
+    // La conexión sigue viva y cacheada; marcamos el esquema como anticuado.
+    db.exec("PRAGMA user_version = 0");
+
+    expect(() => repo.setPublisherTier("rtve.es", "reliable_secondary")).not.toThrow();
+    expect(repo.getPublisherTier("rtve.es")).toBe("reliable_secondary");
+  });
+
+  it("no reescribe el esquema cuando ya está al día", async () => {
+    const { getDb } = await import("@/lib/db/client");
+    const repo = await import("@/lib/db/repo");
+
+    repo.setPublisherTier("abc.es", "reliable_secondary");
+    getDb();
+    // Una llamada posterior no debe perder lo ya guardado.
+    getDb();
+    expect(repo.getPublisherTier("abc.es")).toBe("reliable_secondary");
+  });
+});

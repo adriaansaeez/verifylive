@@ -278,5 +278,10 @@ contrastables de referencia encontradas.
 - **Todo aparece como simulado**: falta `NAN_KEY` o está vacía. Es el
   comportamiento intencional; añade la clave y reinicia.
 - **Error de `node:sqlite`**: estás en Node < 22. Cambia de versión de Node.
+- **`no such table` o `no column named` tras tocar el esquema**: la conexión
+  vive en `globalThis` y sobrevive al hot reload, así que un esquema escrito
+  con el servidor en marcha no llegaba a aplicarse. `lib/db/client.ts` sella
+  una versión de esquema y migra la conexión viva al detectar que está
+  anticuada; si añades una tabla o una columna, sube `SCHEMA_VERSION`.
 - **Sin red**: la app sigue funcionando con el fixture y el corpus local; los
   veredictos sin evidencia quedan como no verificables/provisionales.

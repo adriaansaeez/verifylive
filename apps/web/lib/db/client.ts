@@ -106,6 +106,29 @@ function applyAddedColumns(db: DatabaseSync): void {
   }
 }
 
+/**
+ * Bump this whenever SCHEMA or ADDED_COLUMNS changes.
+ *
+ * The connection is cached on globalThis so it survives hot reload, which
+ * means a schema written after the server started was never applied to it:
+ * eighteen analyses died today with "no such table: publishers" and "table
+ * revisions has no column named diagnostics", both from editing the schema
+ * of a running server. Comparing a stamped version on every call costs one
+ * PRAGMA and migrates the live connection instead.
+ */
+const SCHEMA_VERSION = 2;
+
+function migrate(db: DatabaseSync): void {
+  db.exec(SCHEMA);
+  applyAddedColumns(db);
+  db.exec(`PRAGMA user_version = ${SCHEMA_VERSION}`);
+}
+
+function schemaVersionOf(db: DatabaseSync): number {
+  const row = db.prepare("PRAGMA user_version").get() as { user_version?: unknown } | undefined;
+  return Number(row?.user_version ?? 0);
+}
+
 type GlobalWithDb = typeof globalThis & { __veritasDb?: DatabaseSync };
 
 function databasePath(): string {
@@ -121,7 +144,13 @@ function databasePath(): string {
 
 export function getDb(): DatabaseSync {
   const globalStore = globalThis as GlobalWithDb;
-  if (globalStore.__veritasDb) return globalStore.__veritasDb;
+  const existing = globalStore.__veritasDb;
+  if (existing) {
+    // Cheap on every call, and the only thing that catches a schema edited
+    // while this connection was already open.
+    if (schemaVersionOf(existing) !== SCHEMA_VERSION) migrate(existing);
+    return existing;
+  }
 
   const file = databasePath();
   fs.mkdirSync(path.dirname(file), { recursive: true });
@@ -130,8 +159,7 @@ export function getDb(): DatabaseSync {
   db.exec("PRAGMA wal_autocheckpoint = 256;");
   db.exec("PRAGMA foreign_keys = ON;");
   db.exec("PRAGMA busy_timeout = 5000;");
-  db.exec(SCHEMA);
-  applyAddedColumns(db);
+  migrate(db);
   globalStore.__veritasDb = db;
   return db;
 }
