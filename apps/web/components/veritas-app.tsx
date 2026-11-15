@@ -5,6 +5,8 @@ import { useSession } from "@/lib/client/use-session";
 import { clock } from "./format";
 import ClaimCard from "./claim-card";
 import EvidenceDrawer from "./evidence-drawer";
+import YoutubeStage from "./youtube-stage";
+import { parseYoutube, type YoutubeRef } from "@/lib/client/youtube";
 
 const PHASE_LABEL: Record<string, string> = {
   setup: "En espera",
@@ -18,6 +20,7 @@ const PHASE_LABEL: Record<string, string> = {
 export default function VeritasApp() {
   const session = useSession();
   const [openClaimId, setOpenClaimId] = useState<string | null>(null);
+  const [video, setVideo] = useState<YoutubeRef | null>(null);
   const { snapshot, config, phase } = session;
 
   const claims = useMemo(() => (snapshot ? [...snapshot.claims].reverse() : []), [snapshot]);
@@ -57,7 +60,14 @@ export default function VeritasApp() {
             {phase === "finishing" ? "Cerrando…" : phase === "starting" ? "Preparando…" : "Detener y verificar"}
           </button>
         ) : (
-          <button type="button" className="btn ghost small" onClick={session.reset}>
+          <button
+            type="button"
+            className="btn ghost small"
+            onClick={() => {
+              setVideo(null);
+              session.reset();
+            }}
+          >
             Nueva sesión
           </button>
         )}
@@ -72,14 +82,26 @@ export default function VeritasApp() {
         </div>
       ) : null}
 
-      {phase === "setup" || phase === "error" ? (
-        <Setup session={session} />
+      {(phase === "setup" || phase === "error") && !video ? (
+        <Setup session={session} onVideo={setVideo} />
       ) : (
-        <main className="live">
-          <section className="transcript-col" aria-label="Transcripción">
+        <main className={`live${video ? " with-stage" : ""}`}>
+          <div className="stage-col">
+            {video ? (
+              <YoutubeStage
+                video={video}
+                phase={phase}
+                onStart={() => void session.startTab({ preferCurrentTab: true })}
+                onChange={() => {
+                  setVideo(null);
+                  session.reset();
+                }}
+              />
+            ) : null}
+            <section className="transcript-col" aria-label="Transcripción">
             <div className="col-head">
               <span className="col-title">Transcripción</span>
-              {session.source === "tab" ? (
+              {session.source === "tab" && inProgress ? (
                 <div className="meter" title="Nivel de audio de la pestaña">
                   <span className="col-title">{session.asrBusy ? "asr" : "audio"}</span>
                   <span className="meter-track">
@@ -89,15 +111,17 @@ export default function VeritasApp() {
                     />
                   </span>
                 </div>
-              ) : (
+              ) : session.source === "fixture" ? (
                 <span className="col-title">guion · {clock(session.demoInfo?.durationMs ?? 0)}</span>
-              )}
+              ) : null}
             </div>
             {segments.length === 0 ? (
               <p className="transcript-empty">
                 {phase === "starting"
                   ? session.model.message || "Preparando la captura…"
-                  : "Esperando la primera frase…"}
+                  : phase === "setup" || phase === "error"
+                    ? "Pulsa «Empezar a verificar» cuando el vídeo esté donde quieras."
+                    : "Esperando la primera frase…"}
               </p>
             ) : (
               <div className="transcript-document" aria-live="polite">
@@ -131,7 +155,8 @@ export default function VeritasApp() {
                 {session.model.message} · {Math.round(session.model.progress * 100)}%
               </p>
             ) : null}
-          </section>
+            </section>
+          </div>
 
           <section className="claims-col" aria-label="Afirmaciones analizadas">
             <div className="claims-head">
@@ -197,13 +222,29 @@ export default function VeritasApp() {
 
 type SetupProps = {
   session: ReturnType<typeof useSession>;
+  onVideo: (video: YoutubeRef) => void;
 };
 
-function Setup({ session }: SetupProps) {
+function Setup({ session, onVideo }: SetupProps) {
   const { config, phase, model, demoInfo } = session;
   const busy = phase === "starting";
   const [accessToken, setAccessToken] = useState("");
   const [accessStatus, setAccessStatus] = useState<string | null>(null);
+  const [url, setUrl] = useState("");
+  const [urlError, setUrlError] = useState<string | null>(null);
+
+  // Solo carga el vídeo. La captura va aparte, desde el propio panel, para
+  // que el usuario pueda situarse en el minuto que le interese antes.
+  const startVideo = (event: React.FormEvent): void => {
+    event.preventDefault();
+    const parsed = parseYoutube(url);
+    if (!parsed) {
+      setUrlError("No reconozco ese enlace. Pega la dirección de un vídeo de YouTube.");
+      return;
+    }
+    setUrlError(null);
+    onVideo(parsed);
+  };
 
   const saveAccess = async (): Promise<void> => {
     setAccessStatus("Comprobando…");
@@ -240,10 +281,38 @@ function Setup({ session }: SetupProps) {
             <li>Cada veredicto lleva debajo las fuentes con las que se tomó.</li>
             <li>El audio no sale de tu ordenador: se transcribe aquí mismo.</li>
           </ul>
+          <form className="video-form" onSubmit={startVideo}>
+            <label className="video-label" htmlFor="yt-url">
+              Pega el enlace del vídeo, el debate o el mitin
+            </label>
+            <div className="video-row">
+              <input
+                id="yt-url"
+                type="url"
+                inputMode="url"
+                placeholder="https://www.youtube.com/watch?v=..."
+                value={url}
+                onChange={(event) => {
+                  setUrl(event.target.value);
+                  if (urlError) setUrlError(null);
+                }}
+                disabled={busy || !config}
+                autoComplete="off"
+                spellCheck={false}
+              />
+              <button type="submit" className="btn" disabled={busy || !config || !url.trim()}>
+                Cargar vídeo
+              </button>
+            </div>
+            <p className="setup-note">
+              {urlError ?? "El vídeo se abre aquí dentro, junto a la transcripción y las verificaciones."}
+            </p>
+          </form>
+
           <div className="setup-actions">
             <button
               type="button"
-              className="btn"
+              className="btn ghost"
               onClick={() => void session.startDemo()}
               disabled={busy || !config}
             >

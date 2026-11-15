@@ -306,7 +306,7 @@ export function useSession() {
   );
 
   const startCapture = useCallback(
-    async (kind: "tab" | "mic") => {
+    async (kind: "tab" | "mic", options: { preferCurrentTab?: boolean } = {}) => {
       if (phase === "starting" || phase === "live") return;
       stoppedRef.current = false;
       stopPromiseRef.current = null;
@@ -325,7 +325,7 @@ export function useSession() {
       let stream: MediaStream | null = null;
       let sharingEnded = false;
       try {
-        stream = kind === "tab" ? await requestTabStream() : await requestMicStream();
+        stream = kind === "tab" ? await requestTabStream(options) : await requestMicStream();
         if (kind === "tab") {
           for (const track of stream.getAudioTracks()) {
             track.addEventListener("ended", () => {
@@ -385,7 +385,10 @@ export function useSession() {
     [onAudioChunk, openStream, phase],
   );
 
-  const startTab = useCallback(() => startCapture("tab"), [startCapture]);
+  const startTab = useCallback(
+    (options: { preferCurrentTab?: boolean } = {}) => startCapture("tab", options),
+    [startCapture],
+  );
   const startMic = useCallback(() => startCapture("mic"), [startCapture]);
 
   const stop = useCallback(async () => {

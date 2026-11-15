@@ -64,7 +64,16 @@ registerProcessor("veritas-chunker", VeritasChunker);
  * activation for getDisplayMedia, and any prior await (model download, session
  * POST) consumes it → "getDisplayMedia must be called from a user gesture handler".
  */
-export async function requestTabStream(): Promise<MediaStream> {
+export type TabStreamOptions = {
+  /**
+   * Ofrece directamente esta pestaña en el selector. Es lo que hace falta
+   * cuando el vídeo va incrustado aquí: con varias pestañas de título parecido
+   * es fácil compartir la equivocada y entonces no llega ni un sonido.
+   */
+  preferCurrentTab?: boolean;
+};
+
+export async function requestTabStream(options: TabStreamOptions = {}): Promise<MediaStream> {
   if (!navigator.mediaDevices?.getDisplayMedia) {
     throw new Error("Tu navegador no soporta getDisplayMedia. Usa Chrome o Edge.");
   }
@@ -74,7 +83,9 @@ export async function requestTabStream(): Promise<MediaStream> {
     stream = await navigator.mediaDevices.getDisplayMedia({
       video: true,
       audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
-    });
+      // Propiedad de Chrome, aún fuera del tipado estándar.
+      ...(options.preferCurrentTab ? { preferCurrentTab: true } : {}),
+    } as DisplayMediaStreamOptions);
   } catch (cause) {
     if (cause instanceof DOMException && cause.name === "NotAllowedError") {
       throw new Error("Compartir pestaña cancelado. Elige la pestaña y marca «Compartir audio».");
