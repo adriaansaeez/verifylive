@@ -26,7 +26,7 @@ type SearchHit = {
   publishedAt: string | null;
 };
 
-const USER_AGENT = "VeritasLive/0.1 (hackathon MVP; evidence retrieval)";
+const USER_AGENT = "VeritasLive/0.1 (+https://github.com/adriaansaeez/veritas-live; evidence retrieval)";
 const CACHE_TTL_MS = 5 * 60_000;
 const CACHE_MAX = 60;
 const ENRICH_LIMIT = 3;

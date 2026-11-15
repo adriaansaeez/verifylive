@@ -143,7 +143,7 @@ Clef tiene un codificador de visión y puede evaluar imágenes (Cloudflare indic
 | `400` | JSON mal formado | El mensaje de error dice qué falla. Revisa también que uses comillas rectas `"`. |
 | `404` | No tienes acceso | Revisa tu key y la cabecera `Authorization: Bearer …` |
 | `429` | Vas demasiado rápido: más de una petición a la vez | Espera un segundo y reintenta. Haz las peticiones en serie. |
-| `502` / `504` | Problema del servicio | Reintenta. Si sigue fallando, avisa en el canal del hackathon en Discord. |
+| `502` / `504` | Problema del servicio | Reintenta con espera creciente. Si persiste, el servicio está caído. |
 
 Fíate siempre del cuerpo del error que te devuelva la API.
 

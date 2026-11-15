@@ -175,8 +175,7 @@ apps/web/                 La aplicación (Next.js 16 + React 19 + TypeScript)
   docs/demo-script.md     Guion de demo de 3 minutos
   search/                 SearXNG autoalojado (docker-compose)
   scripts/probe-nan.ts    Diagnóstico de una llamada real a NaN/Clef
-docs/                     API de Clef, retos del hackathon y este flujo
-ideas/                    Exploración y comparación de las tres ideas
+docs/                     Referencia de la API de Clef y este flujo
 examples/                 Llamadas de ejemplo a Clef (curl, Python, Node)
 spikes/parakeet-browser/  Spike que valida Parakeet en WebGPU
 ```
@@ -254,7 +253,7 @@ Conviene saberlo antes de confiar en ninguna pantalla:
   aparece su ficha pasan unos segundos. Es el tiempo de oír, buscar y comprobar.
 - **Solo español**, de momento. El transcriptor y las preguntas están ajustados
   a este idioma.
-- **Es un MVP de hackathon.** Base de datos local, un solo proceso, cuotas en
+- **Es un prototipo.** Base de datos local, un solo proceso, cuotas en
   memoria. Vale para una demo o para ti; no para abrirlo a medio país.
 - **Sin internet** sigue funcionando con el discurso de ejemplo y su corpus,
   pero casi nada recibe fuentes nuevas.
@@ -266,10 +265,7 @@ Conviene saberlo antes de confiar en ninguna pantalla:
 | [docs/flujo.md](docs/flujo.md) | Flujo completo, etapa por etapa, con código y rutas de fallo |
 | [apps/web/README.md](apps/web/README.md) | Decisiones técnicas detalladas, mediciones y problemas habituales |
 | [docs/api.md](docs/api.md) | Referencia de Clef en NaN: petición, tipos, límites y errores |
-| [docs/hackathon.md](docs/hackathon.md) | Bases del #2 Hackathon NaN y especificación de los retos |
-| [docs/retos/03-fact-check.md](docs/retos/03-fact-check.md) | Reto 3, el que implementa este repositorio |
 | [apps/web/docs/demo-script.md](apps/web/docs/demo-script.md) | Guion de demo en vivo (3 minutos) |
-| [ideas/02-veritas-live/](ideas/02-veritas-live/) | Propuesta original y plan del MVP |
 
 ## Créditos
 
