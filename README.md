@@ -1,4 +1,4 @@
-![Veritas Live verificando en directo el debate electoral de laSexta: a la izquierda el vídeo, en el centro la transcripción y a la derecha las afirmaciones con su veredicto y sus fuentes.](assets/banner.png)
+![Portada de Veritas Live: la silueta de un juez, el nombre y el lema «Que no te la cuelen».](brand/veritas-cover.png)
 
 # Veritas Live
 
@@ -50,6 +50,8 @@ llegarían a la misma conclusión.
 habla. Si la afirmación de tu partido está respaldada, lo dirá igual.
 
 ## Qué ves en pantalla
+
+![Veritas Live en directo: el vídeo encajado en su columna, la transcripción debajo y las afirmaciones con su veredicto en color a la derecha.](assets/flow.png)
 
 Arriba a la izquierda, el vídeo. Debajo, lo que se está diciendo, transcrito en
 tu propio ordenador. A la derecha, una ficha por cada afirmación que merece
