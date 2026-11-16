@@ -144,6 +144,8 @@ export type RuntimeConfig = {
    * Degradar en silencio deja al usuario mirando una pantalla vacía sin saber
    * que el servicio se cayó.
    */
+  /** Qué evaluador decide ahora mismo, cuando hay alguno en pie. */
+  decider: string | null;
   clefNote: string | null;
   /**
    * Si se pueden buscar fuentes de verdad. Va aparte de `clefMode` a

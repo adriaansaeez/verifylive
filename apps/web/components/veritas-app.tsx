@@ -45,7 +45,9 @@ export default function VeritasApp() {
             title={config.clefNote ?? undefined}
           >
             <i className="dot" />
-            {config.clefMode === "live" ? "clef en vivo" : "clef simulado"}
+            {config.clefMode === "live"
+              ? (config.decider ?? "evaluador en vivo")
+              : "evaluador simulado"}
           </span>
         ) : null}
         <span className="mode-chip">

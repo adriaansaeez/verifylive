@@ -4,7 +4,8 @@ import { clamp01 } from "@/lib/text";
 import type { ParsedClef } from "@/lib/clef/client";
 import { claimAnchors } from "@/lib/claims/anchors";
 import { qualityLabel } from "@/lib/clef/client";
-import { MIN_CHECKABLE, MIN_CONFIDENCE, PROVISIONAL_NEEDS_MORE } from "@/lib/config";
+import { MIN_CHECKABLE, MIN_CONFIDENCE } from "@/lib/config";
+import { needsMoreThreshold } from "@/lib/clef/providers";
 import { applyNumericCheck } from "@/lib/verdict/numeric";
 import { checkSuperlative } from "@/lib/verdict/superlative";
 import { distinctPublishers, publisherKey } from "@/lib/evidence/sources";
@@ -120,7 +121,9 @@ export function applyVerdictPolicy(input: {
     confidence = clamp01(1 - clef.checkableProbability);
     rationale = `La afirmación no parece verificable (probabilidad de ser factual: ${clef.checkableProbability.toFixed(2)}).`;
   } else if (
-    clef.needsMoreSourcesProbability >= PROVISIONAL_NEEDS_MORE ||
+    // El corte depende de quién respondió: cada evaluador puntúa en su
+    // propia escala y mezclarlas marcaba como dudoso hasta un dato oficial.
+    clef.needsMoreSourcesProbability >= needsMoreThreshold(clef.raw?.model) ||
     clef.evidenceQualityScore < 2 ||
     evidence.length < 2 ||
     distinctPublishers(evidence) < 2

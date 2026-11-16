@@ -1,13 +1,12 @@
-import { CLEF_TIMEOUT_MS, CLEF_URL } from "@/lib/config";
+import { CLEF_TIMEOUT_MS } from "@/lib/config";
 import type { Verdict } from "@/lib/types";
 import { clamp01 } from "@/lib/text";
-import { markClefUnavailable } from "@/lib/clef/availability";
-
-export {
-  clefUnavailableReason,
-  markClefUnavailable,
-  resetClefAvailability,
-} from "@/lib/clef/availability";
+import { markRetired, retiredReason } from "@/lib/clef/availability";
+import {
+  configuredProviders,
+  providerKey,
+  type SystemOneProvider,
+} from "@/lib/clef/providers";
 
 export type ClefQuestion =
   | { type: "noul"; instructions: string }
@@ -113,46 +112,83 @@ export function parseClefResponse(payload: ClefRawResponse): ParsedClef {
 }
 
 /** Single raw call with timeout. Retries and ordering live in the queue. */
-export async function callClefRaw(
+/** Una llamada a un evaluador concreto. */
+async function callProvider(
+  provider: SystemOneProvider,
   state: string,
   questions: Record<string, ClefQuestion>,
   options: { signal?: AbortSignal } = {},
 ): Promise<ClefRawResponse> {
-  const key = process.env.NAN_KEY?.trim();
-  if (!key) throw new ClefError("NAN_KEY is not configured", 0, false);
-
   const timeout = AbortSignal.timeout(CLEF_TIMEOUT_MS);
   const signal = options.signal ? AbortSignal.any([options.signal, timeout]) : timeout;
 
-  const response = await fetch(CLEF_URL, {
+  const response = await fetch(provider.url, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${key}`,
+      Authorization: `Bearer ${providerKey(provider)}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ model: "clef", state, questions }),
+    body: JSON.stringify({ model: provider.model, state, questions }),
     signal,
     cache: "no-store",
   });
 
   if (!response.ok) {
     const body = await response.text().catch(() => "");
-    const retryable = response.status === 429 || response.status === 502 || response.status === 504;
-    // 404 aquí significa que el modelo ya no se sirve. Reintentar no arregla
-    // nada y cada intento retrasa la ficha, así que se anota y se deja de pedir.
-    if (response.status === 404) {
-      markClefUnavailable(
-        "El servicio de NaN ya no sirve el modelo «clef»; la app sigue con el clasificador local.",
-      );
-    }
+    const retryable =
+      response.status === 429 || response.status === 502 || response.status === 504;
     throw new ClefError(
-      `Clef HTTP ${response.status}${body ? `: ${body.slice(0, 300)}` : ""}`,
+      `${provider.label} HTTP ${response.status}${body ? `: ${body.slice(0, 300)}` : ""}`,
       response.status,
       retryable,
     );
   }
 
   return (await response.json()) as ClefRawResponse;
+}
+
+/** Un 404 es un modelo que ya no se sirve; un 401/403, una clave que no vale.
+ *  En ambos casos insistir no arregla nada: se apunta y se pasa al siguiente. */
+function retiresProvider(status: number): boolean {
+  return status === 404 || status === 401 || status === 403;
+}
+
+function reasonFor(provider: SystemOneProvider, status: number): string {
+  return status === 404
+    ? `El servicio ya no sirve el modelo «${provider.model}» (${provider.label}).`
+    : `La clave de ${provider.label} fue rechazada (HTTP ${status}).`;
+}
+
+/**
+ * Pregunta al primer evaluador que siga en pie. Los reintentos y el orden de
+ * las llamadas los gobierna la cola, no esta función.
+ */
+export async function callClefRaw(
+  state: string,
+  questions: Record<string, ClefQuestion>,
+  options: { signal?: AbortSignal } = {},
+): Promise<ClefRawResponse> {
+  const providers = configuredProviders().filter((provider) => !retiredReason(provider.id));
+  if (providers.length === 0) {
+    throw new ClefError("No queda ningún evaluador System One disponible", 0, false);
+  }
+
+  let last: unknown = null;
+  for (const provider of providers) {
+    try {
+      return await callProvider(provider, state, questions, options);
+    } catch (cause) {
+      last = cause;
+      if (cause instanceof ClefError && retiresProvider(cause.status)) {
+        markRetired(provider.id, reasonFor(provider, cause.status));
+        continue;
+      }
+      // Un fallo pasajero pertenece a este proveedor: que lo reintente la cola
+      // en vez de saltar a otro evaluador y mezclar criterios a mitad de sesión.
+      throw cause;
+    }
+  }
+  throw last ?? new ClefError("Ningún evaluador respondió", 0, false);
 }
 
 export function buildQuestions(): Record<string, ClefQuestion> {

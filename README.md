@@ -163,6 +163,15 @@ Detalle etapa por etapa, con entradas, salidas y archivos: **[docs/flujo.md](doc
   el primero exige una cabecera que YouTube no manda) y a pedir la captura con
   `preferCurrentTab`, porque con el selector completo es fácil compartir la
   pestaña equivocada y entonces no llega ni un sonido.
+- **Dos evaluadores, no uno.** Clef y Jev (TypeSafe) hablan el mismo
+  protocolo (`/v1/systemone`, preguntas `noul`/`choice`/`score`), así que la
+  app pregunta al primero que siga en pie y solo recurre al clasificador
+  local si no queda ninguno. No es teoría: NaN retiró el modelo «clef» y la
+  app, que entonces no sabía distinguir «el evaluador ha muerto» de «aquí no
+  hay nada que comprobar», se quedó transcribiendo sin sacar una sola ficha.
+  Los umbrales se fijan por modelo, porque no son transferibles: con el 0,65
+  calibrado para Clef, Jev marcaba como dudoso hasta un dato de Eurostat con
+  fuente oficial.
 - **Correcciones sin borrar historia.** Cada evaluación queda como revisión
   numerada con confianza, calidad de evidencia y si fue provisional o simulada.
 
@@ -201,11 +210,13 @@ npm run dev                 # http://localhost:3000
 ```
 
 Sin `.env.local` la app arranca en **modo simulado** y funciona completa con el
-fixture y el corpus local. Para activar Clef real:
+fixture y el corpus local. Para activar un evaluador real:
 
 ```bash
 # en apps/web/.env.local
-NAN_KEY=tu-key-de-nan
+# Basta con uno. Con los dos, se usa el primero que responda.
+NAN_KEY=tu-key-de-nan            # Clef
+TYPESAFE_API_KEY=tu-key          # Jev, en console.typesafe.ai
 
 # opcional: buscador autoalojado (mejor evidencia sin claves)
 npm run search:up

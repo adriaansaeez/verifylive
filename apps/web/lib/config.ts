@@ -1,5 +1,6 @@
 import type { RuntimeConfig } from "./types";
-import { clefUnavailableReason } from "./clef/availability";
+import { retiredProviders, retiredReason } from "./clef/availability";
+import { configuredProviders } from "./clef/providers";
 
 export type SearchProvider = "searxng" | "google" | "brave" | "bingnews" | "bing" | "gdelt";
 
@@ -17,15 +18,20 @@ function flag(name: string, fallback: boolean): boolean {
  */
 export function runtimeConfig(): RuntimeConfig {
   const nanKey = Boolean(process.env.NAN_KEY?.trim());
+  // El evaluador ya no es uno solo: se usa el primero que siga en pie.
+  const configured = configuredProviders();
+  const usable = configured.filter((provider) => !retiredReason(provider.id));
+  const retired = Object.values(retiredProviders());
   const rerankConfigured = Boolean(
     process.env.NAN_RERANK_URL?.trim() && process.env.NAN_RERANK_MODEL?.trim(),
   );
   return {
     // Tener clave no basta: si el modelo ya no se sirve, decir «en vivo»
     // sería falso y además no saldría ninguna ficha.
-    clefMode: nanKey && !clefUnavailableReason() ? "live" : "simulated",
-    clefNote: nanKey ? clefUnavailableReason() : null,
-    evidenceMode: nanKey ? "live" : "simulated",
+    clefMode: usable.length > 0 ? "live" : "simulated",
+    decider: usable[0]?.label ?? null,
+    clefNote: retired.length > 0 ? retired.join(" ") : null,
+    evidenceMode: nanKey || configured.length > 0 ? "live" : "simulated",
     chatExtractor: Boolean(process.env.NAN_CHAT_MODEL?.trim() && nanKey),
     rerank: rerankConfigured && nanKey ? "nan" : "local",
     wikipedia: flag("VERITAS_ENABLE_WIKIPEDIA", true),
