@@ -20,7 +20,7 @@ const VERDICT_PATHS: Record<string, { d: string; dot?: [number, number] }> = {
  * Los estados que no son verdadero/falso usan una marca propia para no
  * confundirlos con un veredicto binario.
  */
-function VerdictIcon({ verdict }: { verdict: string }) {
+export function VerdictIcon({ verdict }: { verdict: string }) {
   const icon = VERDICT_PATHS[verdict];
 
   return (

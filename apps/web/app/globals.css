@@ -109,38 +109,17 @@ a {
   color: var(--accent);
 }
 
+.wordmark-mark {
+  width: 27px;
+  height: 27px;
+  flex: 0 0 auto;
+  align-self: center;
+  margin-right: 2px;
+  color: var(--ink);
+}
+
 .masthead-spacer {
   flex: 1;
-}
-
-.mode-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  flex: 0 0 auto;
-  min-width: 136px;
-  padding: 4px 10px;
-  border: 1px solid var(--rule-strong);
-  border-radius: 999px;
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  background: var(--paper-raised);
-}
-
-.mode-chip .dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--ink-faint);
-}
-
-.mode-chip.live .dot {
-  background: var(--support);
-  box-shadow: 0 0 0 3px rgba(47, 107, 72, 0.16);
 }
 
 /* ---------- buttons ---------- */
@@ -200,24 +179,22 @@ a {
 
 .setup {
   flex: 1;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 48px 24px 64px;
 }
 
 .setup-card {
-  width: min(1000px, 100%);
+  width: 100%;
+  max-width: 620px;
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
-  gap: 48px;
-  align-items: start;
+  justify-items: center;
+  text-align: center;
 }
 
-@media (max-width: 860px) {
-  .setup-card {
-    grid-template-columns: 1fr;
-    gap: 32px;
-  }
+.setup-card > div {
+  width: 100%;
 }
 
 .kicker {
@@ -248,15 +225,17 @@ a {
   font-size: 15.5px;
   color: var(--ink-soft);
   max-width: 46ch;
-  margin: 0 0 22px;
+  margin: 0 auto 22px;
 }
 
 .principle-list {
   list-style: none;
-  margin: 0 0 26px;
+  margin: 0 auto 26px;
   padding: 0;
+  width: min(100%, 470px);
   display: grid;
   gap: 9px;
+  text-align: left;
 }
 
 .principle-list li {
@@ -276,10 +255,23 @@ a {
   background: var(--rule-strong);
 }
 
-.setup-actions {
+.setup-paths {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
   gap: 10px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--rule);
+}
+
+.setup-paths-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
 }
 
 .setup-note {
@@ -294,71 +286,6 @@ a {
   background: var(--paper-raised);
   box-shadow: var(--shadow);
   border-radius: 4px;
-}
-
-.checklist {
-  padding: 20px 22px;
-}
-
-.checklist h2 {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  margin: 0 0 14px;
-}
-
-.checklist dl {
-  margin: 0;
-  display: grid;
-  gap: 0;
-}
-
-.check-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 9px 0;
-  border-top: 1px solid var(--rule);
-  font-size: 13px;
-}
-
-.check-row:first-of-type {
-  border-top: 0;
-}
-
-.check-row dt {
-  color: var(--ink-soft);
-}
-
-.check-row dd {
-  margin: 0;
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  text-align: right;
-}
-
-.check-row dd.ok {
-  color: var(--support);
-}
-
-.check-row dd.warn {
-  color: var(--misleading);
-}
-
-.check-row dd.off {
-  color: var(--ink-faint);
-}
-
-.checklist .foot {
-  margin: 16px 0 0;
-  font-size: 12px;
-  color: var(--ink-faint);
-  line-height: 1.55;
 }
 
 /* ---------- live layout ---------- */
@@ -584,13 +511,11 @@ main.live.with-stage {
   max-width: 70ch;
 }
 
-.queue-strip {
+.claims-summary {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px 18px;
-  padding: 9px 0 14px;
-  border-bottom: 1px solid var(--rule);
-  margin-bottom: 18px;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 12px;
   font-family: var(--mono);
   font-size: 10.5px;
   letter-spacing: 0.08em;
@@ -598,9 +523,107 @@ main.live.with-stage {
   color: var(--ink-faint);
 }
 
-.queue-strip strong {
+.claims-summary strong {
   color: var(--ink-soft);
   font-weight: 600;
+}
+
+.claims-summary-divider {
+  width: 1px;
+  height: 12px;
+  background: var(--rule-strong);
+}
+
+/* Clasificación por veredicto: cada tipo con su icono y su color pastel. */
+.verdict-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.verdict-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px 5px 8px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  background: var(--paper-raised);
+  color: var(--ink-soft);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+}
+
+.verdict-pill svg {
+  width: 13px;
+  height: 13px;
+  display: block;
+}
+
+.verdict-pill span {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.verdict-pill.all {
+  padding-left: 10px;
+}
+
+.verdict-pill[data-count="0"] {
+  opacity: 0.5;
+}
+
+.verdict-pill:hover {
+  border-color: var(--ink-faint);
+}
+
+.verdict-pill:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.verdict-pill.supported {
+  color: var(--support);
+  border-color: rgba(47, 107, 72, 0.32);
+  background: var(--support-tint);
+}
+.verdict-pill.contradicted {
+  color: var(--contradict);
+  border-color: rgba(160, 47, 42, 0.32);
+  background: var(--contradict-tint);
+}
+.verdict-pill.misleading {
+  color: var(--misleading);
+  border-color: rgba(140, 100, 20, 0.32);
+  background: var(--misleading-tint);
+}
+.verdict-pill.unverifiable {
+  color: var(--unverifiable);
+  border-color: rgba(76, 85, 96, 0.32);
+  background: var(--unverifiable-tint);
+}
+
+.verdict-pill.active {
+  border-color: currentColor;
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+
+.verdict-pill.all.active {
+  border-color: var(--ink-soft);
+  box-shadow: inset 0 0 0 1px var(--ink-soft);
+}
+
+.claims-filter-empty {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: var(--ink-faint);
 }
 
 /* ---------- claim cards ---------- */
@@ -1342,4 +1365,17 @@ main.live.with-stage {
 
 .video-form .setup-note {
   margin: 0;
+}
+
+@media (max-width: 560px) {
+  .video-row {
+    flex-direction: column;
+  }
+
+  .video-row input,
+  .video-row .btn {
+    width: 100%;
+    min-width: 0;
+    flex: none;
+  }
 }

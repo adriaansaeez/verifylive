@@ -1,59 +1,124 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSession } from "@/lib/client/use-session";
 import { clock } from "./format";
-import ClaimCard from "./claim-card";
+import type { Verdict } from "@/lib/types";
+import ClaimCard, { VerdictIcon } from "./claim-card";
 import EvidenceDrawer from "./evidence-drawer";
+import JudgeMark from "./judge-mark";
 import YoutubeStage from "./youtube-stage";
 import { parseYoutube, type YoutubeRef } from "@/lib/client/youtube";
 
-const PHASE_LABEL: Record<string, string> = {
-  setup: "En espera",
-  starting: "Iniciando",
-  live: "En directo",
-  finishing: "Cerrando",
-  done: "Sesión cerrada",
-  error: "Error",
+const VERDICT_ORDER: Verdict[] = ["supported", "contradicted", "misleading", "unverifiable"];
+
+const VERDICT_PLURAL: Record<Verdict, string> = {
+  supported: "Respaldadas",
+  contradicted: "Contradichas",
+  misleading: "Engañosas",
+  unverifiable: "No verificables",
 };
 
 export default function VeritasApp() {
   const session = useSession();
   const [openClaimId, setOpenClaimId] = useState<string | null>(null);
   const [video, setVideo] = useState<YoutubeRef | null>(null);
-  const { snapshot, config, phase } = session;
+  const [verdictFilter, setVerdictFilter] = useState<Verdict | null>(null);
+  const { snapshot, phase } = session;
+
+  /**
+   * La transcripción sigue siempre la última palabra, salvo que el usuario
+   * suba a leer algo: en cuanto se aleja del fondo dejamos de arrastrarle.
+   */
+  const transcriptEl = useRef<HTMLElement | null>(null);
+  const followTail = useRef(true);
+
+  const attachTranscript = useCallback((el: HTMLElement | null) => {
+    transcriptEl.current = el;
+    if (!el) return;
+
+    followTail.current = true;
+    const nearBottom = () => el.scrollHeight - el.scrollTop - el.clientHeight < 48;
+    const onScroll = () => {
+      followTail.current = nearBottom();
+    };
+    // La intención del usuario manda: si empuja hacia arriba dejamos de
+    // perseguir la última frase aunque llegue un segmento en ese instante.
+    const onWheel = (event: WheelEvent) => {
+      if (event.deltaY < 0) followTail.current = false;
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (["ArrowUp", "PageUp", "Home"].includes(event.key)) followTail.current = false;
+    };
+    const onTouchStart = () => {
+      if (!nearBottom()) followTail.current = false;
+    };
+
+    el.addEventListener("scroll", onScroll, { passive: true });
+    el.addEventListener("wheel", onWheel, { passive: true });
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("keydown", onKeyDown);
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      el.removeEventListener("wheel", onWheel);
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("keydown", onKeyDown);
+    };
+  }, []);
 
   const claims = useMemo(() => (snapshot ? [...snapshot.claims].reverse() : []), [snapshot]);
   const segments = snapshot?.segments ?? [];
+
+  useEffect(() => {
+    const el = transcriptEl.current;
+    if (!el || !followTail.current) return;
+    if (el.scrollHeight > el.clientHeight + 1) {
+      el.scrollTop = el.scrollHeight;
+    } else {
+      // En móvil la columna no tiene scroll propio: la página es la que crece.
+      window.scrollTo(0, document.documentElement.scrollHeight);
+    }
+  }, [segments, phase]);
+
+  const verdictCounts = useMemo(() => {
+    const counts: Record<Verdict, number> = { supported: 0, contradicted: 0, misleading: 0, unverifiable: 0 };
+    for (const claim of snapshot?.claims ?? []) {
+      if (claim.status !== "resolved") continue;
+      const verdict = claim.revisions.at(-1)?.verdict;
+      if (verdict) counts[verdict] += 1;
+    }
+    return counts;
+  }, [snapshot]);
   const claimForSegment = (startMs: number, endMs: number) =>
     snapshot?.claims.find((claim) => claim.startMs < endMs && claim.endMs > startMs) ?? null;
   const openClaim = claims.find((claim) => claim.id === openClaimId) ?? null;
   const inProgress = phase === "starting" || phase === "live" || phase === "finishing";
   const resolvedCount = claims.filter((claim) => claim.status === "resolved").length;
   const failedClaims = claims.filter((claim) => claim.status === "failed").length;
+  const visibleClaims = useMemo(
+    () =>
+      verdictFilter
+        ? claims.filter(
+            (claim) =>
+              claim.status === "resolved" && claim.revisions.at(-1)?.verdict === verdictFilter,
+          )
+        : claims,
+    [claims, verdictFilter],
+  );
+
+  // Un filtro no debe sobrevivir a la sesión que lo justificaba.
+  useEffect(() => {
+    if (claims.length === 0) setVerdictFilter(null);
+  }, [claims.length]);
 
   return (
     <div className="shell">
       <header className="masthead">
         <div className="wordmark">
+          <JudgeMark className="wordmark-mark" />
           <strong>Veritas</strong>
           <span>Live</span>
         </div>
-        {config ? (
-          <span
-            className={`mode-chip ${config.clefMode === "live" ? "live" : ""}`}
-            title={config.clefNote ?? undefined}
-          >
-            <i className="dot" />
-            {config.clefMode === "live"
-              ? (config.decider ?? "evaluador en vivo")
-              : "evaluador simulado"}
-          </span>
-        ) : null}
-        <span className="mode-chip">
-          <i className="dot" />
-          {PHASE_LABEL[phase] ?? phase}
-        </span>
         <span className="masthead-spacer" />
         {inProgress ? (
           <button
@@ -78,12 +143,6 @@ export default function VeritasApp() {
         )}
       </header>
 
-      {config?.clefNote ? (
-        <div className="notice-banner">
-          <span>{config.clefNote}</span>
-        </div>
-      ) : null}
-
       {session.error ? (
         <div className="error-banner">
           <span>{session.error}</span>
@@ -99,7 +158,7 @@ export default function VeritasApp() {
         <main className={`live${video ? " with-stage" : ""}`}>
           <div className="stage-col">
             {video ? <YoutubeStage video={video} /> : null}
-            <section className="transcript-col" aria-label="Transcripción">
+            <section className="transcript-col" aria-label="Transcripción" ref={attachTranscript}>
             <div className="col-head">
               <span className="col-title">Transcripción</span>
               {session.source === "tab" && inProgress ? (
@@ -166,26 +225,48 @@ export default function VeritasApp() {
                 {resolvedCount}/{claims.length} analizadas
               </span>
             </div>
-            <div className="queue-strip">
-              <span>
-                clef <strong>{snapshot?.queue.inFlight ?? 0}</strong> en curso
-              </span>
-              <span>
-                cola <strong>{snapshot?.queue.waiting ?? 0}</strong>
-              </span>
-              <span>
-                resueltas <strong>{resolvedCount}</strong>
-              </span>
-              <span>
-                fallidas <strong>{failedClaims}</strong>
-              </span>
-              <span>
-                última espera{" "}
-                <strong>
-                  {snapshot?.queue.lastWaitMs ? `${(snapshot.queue.lastWaitMs / 1000).toFixed(1)} s` : "—"}
-                </strong>
-              </span>
-            </div>
+            {claims.length > 0 ? (
+              <>
+                <div className="claims-summary">
+                  <span>
+                    Resueltas <strong>{resolvedCount}</strong>
+                  </span>
+                  <span className="claims-summary-divider" aria-hidden="true" />
+                  <span>
+                    Fallidas <strong>{failedClaims}</strong>
+                  </span>
+                </div>
+                <div
+                  className="verdict-strip"
+                  role="group"
+                  aria-label="Clasificar afirmaciones por veredicto"
+                >
+                  <button
+                    type="button"
+                    className={`verdict-pill all${verdictFilter === null ? " active" : ""}`}
+                    aria-pressed={verdictFilter === null}
+                    onClick={() => setVerdictFilter(null)}
+                  >
+                    Todas <span>{claims.length}</span>
+                  </button>
+                  {VERDICT_ORDER.map((verdict) => (
+                    <button
+                      key={verdict}
+                      type="button"
+                      data-count={verdictCounts[verdict]}
+                      className={`verdict-pill ${verdict}${verdictFilter === verdict ? " active" : ""}`}
+                      aria-pressed={verdictFilter === verdict}
+                      onClick={() =>
+                        setVerdictFilter((current) => (current === verdict ? null : verdict))
+                      }
+                    >
+                      <VerdictIcon verdict={verdict} />
+                      {VERDICT_PLURAL[verdict]} <span>{verdictCounts[verdict]}</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : null}
 
             {claims.length === 0 ? (
               phase === "setup" || phase === "error" ? (
@@ -205,9 +286,13 @@ export default function VeritasApp() {
                   </button>
                 </div>
               ) : null
+            ) : visibleClaims.length === 0 ? (
+              <p className="claims-filter-empty">
+                No hay afirmaciones de este tipo todavía.
+              </p>
             ) : (
               <div className="claim-list">
-                {claims.map((claim) => (
+                {visibleClaims.map((claim) => (
                   <ClaimCard key={claim.id} claim={claim} onOpen={() => setOpenClaimId(claim.id)} />
                 ))}
               </div>
@@ -227,10 +312,8 @@ type SetupProps = {
 };
 
 function Setup({ session, onVideo }: SetupProps) {
-  const { config, phase, model, demoInfo } = session;
+  const { config, phase, model } = session;
   const busy = phase === "starting";
-  const [accessToken, setAccessToken] = useState("");
-  const [accessStatus, setAccessStatus] = useState<string | null>(null);
   const [url, setUrl] = useState("");
   const [urlError, setUrlError] = useState<string | null>(null);
 
@@ -245,22 +328,6 @@ function Setup({ session, onVideo }: SetupProps) {
     }
     setUrlError(null);
     onVideo(parsed);
-  };
-
-  const saveAccess = async (): Promise<void> => {
-    setAccessStatus("Comprobando…");
-    const response = await fetch("/api/access", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: accessToken }),
-    });
-    const payload = (await response.json().catch(() => ({}))) as { error?: string };
-    if (!response.ok) {
-      setAccessStatus(payload.error ?? `HTTP ${response.status}`);
-      return;
-    }
-    setAccessToken("");
-    setAccessStatus("Acceso guardado para esta sesión del navegador.");
   };
 
   return (
@@ -310,113 +377,32 @@ function Setup({ session, onVideo }: SetupProps) {
             </p>
           </form>
 
-          <div className="setup-actions">
+          <div className="setup-paths">
+            <span className="setup-paths-label">o captura el audio</span>
             <button
               type="button"
-              className="btn ghost"
-              onClick={() => void session.startDemo()}
-              disabled={busy || !config}
-            >
-              {busy ? "Preparando…" : `Ver demo guionizada (${demoInfo ? clock(demoInfo.durationMs) : "90 s"})`}
-            </button>
-            <button
-              type="button"
-              className="btn ghost"
+              className="btn ghost small"
               onClick={() => void session.startTab()}
               disabled={busy || !config}
             >
-              Compartir audio de una pestaña
+              Compartir pestaña
             </button>
             <button
               type="button"
-              className="btn ghost"
+              className="btn ghost small"
               onClick={() => void session.startMic()}
               disabled={busy || !config}
             >
               Usar micrófono
             </button>
           </div>
-          <form
-            className="setup-actions"
-            onSubmit={(event) => {
-              event.preventDefault();
-              void saveAccess();
-            }}
-          >
-            <input
-              type="password"
-              value={accessToken}
-              onChange={(event) => setAccessToken(event.target.value)}
-              placeholder="Token de demo pública (si se requiere)"
-              aria-label="Token de acceso a la demo"
-              autoComplete="current-password"
-            />
-            <button type="submit" className="btn ghost" disabled={!accessToken || busy}>
-              Guardar acceso
-            </button>
-          </form>
-          {accessStatus ? <p className="setup-note">{accessStatus}</p> : null}
           <p className="setup-note">
             {busy
               ? `${model.message || "Iniciando captura"}${model.stage === "loading" ? ` · ${Math.round(model.progress * 100)}%` : ""}`
-              : "Elige la pestaña del vídeo, no la ventana entera, y acuérdate de marcar «Compartir audio». Si no aparece esa casilla, sube el volumen y tira de micrófono."}
+              : "Para la pestaña elige el vídeo, no la ventana entera, y marca «Compartir audio»; si no aparece la casilla, usa el micrófono."}
           </p>
         </div>
 
-        <div className="panel checklist">
-          <h2>Con qué está trabajando</h2>
-          {config ? (
-            <dl>
-              <div className="check-row">
-                <dt>Evaluador Clef</dt>
-                <dd className={config.clefMode === "live" ? "ok" : "warn"}>
-                  {config.clefMode === "live" ? "NAN conectado" : "simulado"}
-                </dd>
-              </div>
-              <div className="check-row">
-                <dt>Extractor de afirmaciones</dt>
-                <dd className={config.chatExtractor ? "ok" : "off"}>
-                  {config.chatExtractor ? "chat NAN" : "heurístico local"}
-                </dd>
-              </div>
-              <div className="check-row">
-                <dt>Reordenación de evidencia</dt>
-                <dd className={config.rerank === "nan" ? "ok" : "off"}>
-                  {config.rerank === "nan" ? "NAN" : "local"}
-                </dd>
-              </div>
-              <div className="check-row">
-                <dt>Wikipedia</dt>
-                <dd className={config.wikipedia ? "ok" : "off"}>
-                  {config.wikipedia ? "activa" : "desactivada"}
-                </dd>
-              </div>
-              <div className="check-row">
-                <dt>Buscador web</dt>
-                <dd className={config.search ? "ok" : "off"}>
-                  {config.search ? config.search : "desactivado"}
-                </dd>
-              </div>
-              <div className="check-row">
-                <dt>Lectura de fuentes (Jina)</dt>
-                <dd className={config.jina ? "ok" : "off"}>{config.jina ? "activa" : "solo extractos"}</dd>
-              </div>
-              <div className="check-row">
-                <dt>Búsqueda web en la nube</dt>
-                <dd className={config.cloudEvidence ? "ok" : "off"}>
-                  {config.cloudEvidence ? "activa" : "local"}
-                </dd>
-              </div>
-            </dl>
-          ) : (
-            <p className="claim-summary">Leyendo configuración…</p>
-          )}
-          <p className="foot">
-            Las claves se leen del entorno del servidor. Sin <code>NAN_KEY</code> el veredicto se
-            calcula con el evaluador simulado y se etiqueta como tal en cada tarjeta: nunca se presenta
-            como una respuesta real.
-          </p>
-        </div>
       </div>
     </section>
   );
