@@ -1,14 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { embedUrl, watchUrl, type YoutubeRef } from "@/lib/client/youtube";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { embedUrl, type YoutubeRef } from "@/lib/client/youtube";
 
 type Props = {
   video: YoutubeRef;
-  /** Fase de la sesión: decide si toca ofrecer empezar o informar de la captura. */
-  phase: string;
-  onStart: () => void;
-  onChange: () => void;
 };
 
 /**
@@ -22,8 +18,7 @@ type Props = {
  * bajo el mismo aislamiento: las órdenes van por postMessage, que el propio
  * reproductor acepta con `enablejsapi=1`.
  */
-export default function YoutubeStage({ video, phase, onStart, onChange }: Props) {
-  const frameRef = useRef<HTMLIFrameElement | null>(null);
+export default function YoutubeStage({ video }: Props) {
   const [origin, setOrigin] = useState("");
 
   useEffect(() => setOrigin(window.location.origin), []);
@@ -39,37 +34,15 @@ export default function YoutubeStage({ video, phase, onStart, onChange }: Props)
    */
   const attach = useCallback(
     (el: HTMLIFrameElement | null) => {
-      frameRef.current = el;
       if (!el || !src) return;
       el.setAttribute("credentialless", "");
       if (el.getAttribute("src") !== src) el.setAttribute("src", src);
     },
     [src],
   );
-  const live = phase === "live";
-  const starting = phase === "starting" || phase === "finishing";
-
-  const command = (func: string) => {
-    frameRef.current?.contentWindow?.postMessage(
-      JSON.stringify({ event: "command", func, args: [] }),
-      "https://www.youtube-nocookie.com",
-    );
-  };
 
   return (
     <section className="stage" aria-label="Vídeo">
-      <div className="col-head">
-        <span className="col-title">vídeo</span>
-        <span className="stage-head-actions">
-          <a className="stage-link" href={watchUrl(video)} target="_blank" rel="noopener noreferrer">
-            ver en YouTube
-          </a>
-          <button type="button" className="btn ghost small" onClick={onChange} disabled={starting}>
-            Cambiar vídeo
-          </button>
-        </span>
-      </div>
-
       <div className="stage-frame">
         {origin ? (
           <iframe
@@ -79,32 +52,6 @@ export default function YoutubeStage({ video, phase, onStart, onChange }: Props)
             allowFullScreen
           />
         ) : null}
-      </div>
-
-      <div className="stage-foot">
-        {live ? (
-          <>
-            <span className="stage-transport">
-              <button type="button" className="btn ghost small" onClick={() => command("playVideo")}>
-                Reproducir
-              </button>
-              <button type="button" className="btn ghost small" onClick={() => command("pauseVideo")}>
-                Pausar
-              </button>
-            </span>
-            <p className="fineprint">Se está transcribiendo lo que suena en este reproductor.</p>
-          </>
-        ) : (
-          <>
-            <button type="button" className="btn" onClick={onStart} disabled={starting}>
-              {starting ? "Preparando…" : "Empezar a verificar"}
-            </button>
-            <p className="fineprint">
-              Dale al play y busca el momento que te interese. Al empezar, Chrome pedirá compartir
-              esta pestaña: acepta con <strong>«Compartir audio»</strong> marcado.
-            </p>
-          </>
-        )}
       </div>
     </section>
   );

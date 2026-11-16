@@ -1,4 +1,5 @@
 import type { RuntimeConfig } from "./types";
+import { clefUnavailableReason } from "./clef/availability";
 
 export type SearchProvider = "searxng" | "google" | "brave" | "bingnews" | "bing" | "gdelt";
 
@@ -20,7 +21,11 @@ export function runtimeConfig(): RuntimeConfig {
     process.env.NAN_RERANK_URL?.trim() && process.env.NAN_RERANK_MODEL?.trim(),
   );
   return {
-    clefMode: nanKey ? "live" : "simulated",
+    // Tener clave no basta: si el modelo ya no se sirve, decir «en vivo»
+    // sería falso y además no saldría ninguna ficha.
+    clefMode: nanKey && !clefUnavailableReason() ? "live" : "simulated",
+    clefNote: nanKey ? clefUnavailableReason() : null,
+    evidenceMode: nanKey ? "live" : "simulated",
     chatExtractor: Boolean(process.env.NAN_CHAT_MODEL?.trim() && nanKey),
     rerank: rerankConfigured && nanKey ? "nan" : "local",
     wikipedia: flag("VERITAS_ENABLE_WIKIPEDIA", true),

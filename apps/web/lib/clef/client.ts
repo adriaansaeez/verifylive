@@ -1,6 +1,13 @@
 import { CLEF_TIMEOUT_MS, CLEF_URL } from "@/lib/config";
 import type { Verdict } from "@/lib/types";
 import { clamp01 } from "@/lib/text";
+import { markClefUnavailable } from "@/lib/clef/availability";
+
+export {
+  clefUnavailableReason,
+  markClefUnavailable,
+  resetClefAvailability,
+} from "@/lib/clef/availability";
 
 export type ClefQuestion =
   | { type: "noul"; instructions: string }
@@ -131,6 +138,13 @@ export async function callClefRaw(
   if (!response.ok) {
     const body = await response.text().catch(() => "");
     const retryable = response.status === 429 || response.status === 502 || response.status === 504;
+    // 404 aquí significa que el modelo ya no se sirve. Reintentar no arregla
+    // nada y cada intento retrasa la ficha, así que se anota y se deja de pedir.
+    if (response.status === 404) {
+      markClefUnavailable(
+        "El servicio de NaN ya no sirve el modelo «clef»; la app sigue con el clasificador local.",
+      );
+    }
     throw new ClefError(
       `Clef HTTP ${response.status}${body ? `: ${body.slice(0, 300)}` : ""}`,
       response.status,

@@ -207,12 +207,14 @@ export type GateResult = {
   selected: GateScore | null;
   scores: GateScore[];
   skipped: boolean;
+  /** La llamada a Clef falló. No es lo mismo que «aquí no hay nada». */
+  failed: boolean;
 };
 
 /** Runs the gate against Clef. Returns `skipped` when no call was worth it. */
 export async function runGate(candidates: ClaimCandidate[]): Promise<GateResult> {
   const eligible = gateCandidates(candidates);
-  if (eligible.length === 0) return { selected: null, scores: [], skipped: true };
+  if (eligible.length === 0) return { selected: null, scores: [], skipped: true, failed: false };
 
   try {
     const raw = await clefQueue.enqueue({
@@ -221,8 +223,10 @@ export async function runGate(candidates: ClaimCandidate[]): Promise<GateResult>
       run: () => callClefRaw(buildGateState(eligible), buildGateQuestions(eligible)),
     });
     const scores = scoreGate(eligible, raw.answers);
-    return { selected: selectGated(scores), scores, skipped: false };
+    return { selected: selectGated(scores), scores, skipped: false, failed: false };
   } catch {
-    return { selected: null, scores: [], skipped: false };
+    // Tragarse el error y devolver «ninguna» hacía que un Clef caído se
+    // pareciese a una conversación sin nada que comprobar.
+    return { selected: null, scores: [], skipped: false, failed: true };
   }
 }

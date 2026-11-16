@@ -11,14 +11,19 @@
   --accent-ink: #fff8f0;
   --support: #2f6b48;
   --support-bg: #dceadf;
+  --support-tint: #e9f4ec;
   --contradict: #a02f2a;
   --contradict-bg: #f2ddda;
+  --contradict-tint: #fbe9e7;
   --misleading: #8c6414;
   --misleading-bg: #f4e8cb;
+  --misleading-tint: #fbf2df;
   --unverifiable: #4c5560;
   --unverifiable-bg: #e2e5e8;
+  --unverifiable-tint: #eef0f3;
   --busy: #6b4f8a;
   --busy-bg: #e7e0f0;
+  --busy-tint: #f2edf8;
   --shadow: 0 1px 0 rgba(22, 19, 14, 0.05), 0 18px 40px -28px rgba(22, 19, 14, 0.5);
   --display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
@@ -111,7 +116,10 @@ a {
 .mode-chip {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
+  flex: 0 0 auto;
+  min-width: 136px;
   padding: 4px 10px;
   border: 1px solid var(--rule-strong);
   border-radius: 999px;
@@ -355,7 +363,7 @@ a {
 
 /* ---------- live layout ---------- */
 
-.live {
+main.live {
   flex: 1;
   display: grid;
   grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
@@ -363,7 +371,7 @@ a {
   min-height: 0;
 }
 
-.live.with-stage {
+main.live.with-stage {
   grid-template-columns: minmax(440px, 1.12fr) minmax(0, 1fr);
 }
 
@@ -378,8 +386,8 @@ a {
 }
 
 @media (max-width: 900px) {
-  .live,
-  .live.with-stage {
+  main.live,
+  main.live.with-stage {
     grid-template-columns: 1fr;
   }
 
@@ -610,22 +618,79 @@ a {
   border-left: 3px solid var(--busy);
   border-radius: 3px;
   background: var(--paper-raised);
-  padding: 16px 18px 14px;
+  padding: 16px 18px 14px 46px;
   box-shadow: var(--shadow);
   animation: rise 300ms ease both;
+  transition: background-color 220ms ease, border-color 220ms ease;
 }
 
+/* Tinte pastel por veredicto: el estado se lee de un vistazo, sin gritar. */
 .claim.v-supported {
   border-left-color: var(--support);
+  background: var(--support-tint);
 }
 .claim.v-contradicted {
   border-left-color: var(--contradict);
+  background: var(--contradict-tint);
 }
 .claim.v-misleading {
   border-left-color: var(--misleading);
+  background: var(--misleading-tint);
 }
 .claim.v-unverifiable {
   border-left-color: var(--unverifiable);
+  background: var(--unverifiable-tint);
+}
+.claim.v-busy {
+  border-left-color: var(--busy);
+  background: var(--busy-tint);
+}
+
+/* Esquina superior izquierda: tick si es verdadero, aspa si es falso. */
+.claim-icon {
+  position: absolute;
+  top: 13px;
+  left: 11px;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--rule-strong);
+  background: var(--paper-raised);
+  color: var(--busy);
+}
+
+.claim-icon svg {
+  width: 13px;
+  height: 13px;
+  display: block;
+}
+
+.claim.v-supported .claim-icon {
+  color: var(--support);
+  border-color: rgba(47, 107, 72, 0.3);
+  background: var(--support-bg);
+}
+.claim.v-contradicted .claim-icon {
+  color: var(--contradict);
+  border-color: rgba(160, 47, 42, 0.3);
+  background: var(--contradict-bg);
+}
+.claim.v-misleading .claim-icon {
+  color: var(--misleading);
+  border-color: rgba(140, 100, 20, 0.3);
+  background: var(--misleading-bg);
+}
+.claim.v-unverifiable .claim-icon {
+  color: var(--unverifiable);
+  border-color: rgba(76, 85, 96, 0.3);
+  background: var(--unverifiable-bg);
+}
+.claim.v-busy .claim-icon {
+  color: var(--busy);
+  border-color: rgba(107, 79, 138, 0.3);
+  background: var(--busy-bg);
 }
 
 .claim-top {
@@ -881,6 +946,18 @@ a {
 
 .error-banner button {
   margin-left: auto;
+}
+
+/* Aviso de degradación: informa sin alarmar como un error. */
+.notice-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 16px;
+  background: var(--misleading-bg);
+  border-bottom: 1px solid rgba(140, 100, 20, 0.3);
+  color: var(--misleading);
+  font-size: 12.5px;
 }
 
 /* ---------- drawer ---------- */
@@ -1141,8 +1218,8 @@ a {
 
 .stage {
   display: grid;
-  gap: 10px;
-  padding: 16px 20px 14px;
+  gap: 0;
+  padding: 0;
   border-bottom: 1px solid var(--rule);
   background: var(--paper-raised);
 }
@@ -1170,14 +1247,14 @@ a {
 
 .stage-frame {
   position: relative;
+  /* La caja ocupa todo el ancho del stage y mantiene la proporción exacta del
+     reproductor: así el iframe la llena sin franjas negras arriba ni abajo. */
+  width: 100%;
   aspect-ratio: 16 / 9;
-  /* El vídeo no puede comerse la columna: la transcripción vive debajo y
-     necesita alto propio. El reproductor se ajusta solo dentro de la caja. */
-  max-height: min(38vh, 330px);
   background: #100d0a;
-  border: 1px solid var(--rule-strong);
-  border-radius: 3px;
+  border: 0;
   overflow: hidden;
+  line-height: 0;
 }
 
 .stage-frame iframe {

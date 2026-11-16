@@ -213,23 +213,29 @@ type Selection = { candidate: ClaimCandidate; gate: GateDiagnostics | null };
  * simulated sessions keep the deterministic classifier so the demo runs with
  * no key. Both prefer the longest span that still reads as a finished idea.
  */
+function selectDeterministic(candidates: ClaimCandidate[]): Selection | null {
+  const eligible = gateCandidates(candidates);
+  const factual = eligible.filter(
+    (candidate) => classifyCheckability(candidate.text) === "likely_fact",
+  );
+  if (factual.length === 0) return null;
+  const widest = factual.reduce((left, right) =>
+    right.partCount > left.partCount ? right : left,
+  );
+  return { candidate: widest, gate: null };
+}
+
 async function selectClaimCandidate(candidates: ClaimCandidate[]): Promise<Selection | null> {
   if (candidates.length === 0) return null;
   const config = runtimeConfig();
 
-  if (config.clefMode !== "live") {
-    const eligible = gateCandidates(candidates);
-    const factual = eligible.filter(
-      (candidate) => classifyCheckability(candidate.text) === "likely_fact",
-    );
-    if (factual.length === 0) return null;
-    const widest = factual.reduce((left, right) =>
-      right.partCount > left.partCount ? right : left,
-    );
-    return { candidate: widest, gate: null };
-  }
+  if (config.clefMode !== "live") return selectDeterministic(candidates);
 
   const result = await runGate(candidates);
+  // Un fallo de Clef no significa que aquí no hubiera nada que comprobar.
+  // Antes se trataban igual y la frase se perdía sin dejar rastro, que es lo
+  // que pasó cuando NaN retiró el modelo: transcripción llena, cero fichas.
+  if (result.failed) return selectDeterministic(candidates);
   if (!result.selected) return null;
   return {
     candidate: result.selected.candidate,
@@ -253,7 +259,7 @@ async function resolveClaim(
   if (searching) emit(claim.sessionId, { type: "claim.updated", claim: searching });
 
   const bundle = await limitEvidence(() =>
-    gatherEvidence(claim, { mode: config.clefMode, warmup }),
+    gatherEvidence(claim, { mode: config.evidenceMode, warmup }),
   );
   const diagnostics: RevisionDiagnostics = {
     connectors: bundle.connectors,
@@ -270,14 +276,26 @@ async function resolveClaim(
 
   let revision: DecisionRevision;
 
+  // Clef puede caerse entre el gate y el veredicto. Sin esto, la ficha se
+  // quedaba en «fallida» en lugar de resolverse con lo que sí tenemos.
+  let live: { raw: ClefRawResponse; ms: number } | null = null;
   if (config.clefMode === "live") {
     const current = getClaim(claim.id) ?? claim;
     const state = clefState(current, evidence);
-    const { raw, ms } = await clefQueue.enqueue({
-      key: `clef:${claim.id}`,
-      priority: 1,
-      run: () => callClefWithRetry(state),
-    });
+    try {
+      live = await clefQueue.enqueue({
+        key: `clef:${claim.id}`,
+        priority: 1,
+        run: () => callClefWithRetry(state),
+      });
+    } catch {
+      live = null;
+    }
+  }
+
+  if (live) {
+    const current = getClaim(claim.id) ?? claim;
+    const { raw, ms } = live;
     const parsed = parseClefResponse(raw);
     diagnostics.settleable = Number(parsed.settleableProbability.toFixed(3));
     const decision = applyVerdictPolicy({
@@ -424,7 +442,7 @@ export async function ingestSegment(input: SegmentInput): Promise<{
     // answers, so the literal quote goes to the search engine during that
     // wait. Started before the await on purpose; the promise is handed to
     // every claim this span produces.
-    const warmup = startWarmupSearch(selected.text, config.clefMode);
+    const warmup = startWarmupSearch(selected.text, config.evidenceMode);
     const canonical = config.chatExtractor
       ? await canonicalizeClaim(selected.text, { spokenAtMs: selected.startMs, session })
       : [];

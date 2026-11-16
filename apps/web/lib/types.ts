@@ -139,6 +139,19 @@ export type QueueState = {
 
 export type RuntimeConfig = {
   clefMode: ClefMode;
+  /**
+   * Por qué el modo no es el esperado, cuando hay una razón que contar.
+   * Degradar en silencio deja al usuario mirando una pantalla vacía sin saber
+   * que el servicio se cayó.
+   */
+  clefNote: string | null;
+  /**
+   * Si se pueden buscar fuentes de verdad. Va aparte de `clefMode` a
+   * propósito: que el modelo de decisión desaparezca no deja a Wikipedia ni
+   * al buscador sin funcionar, y mezclarlos dejaba las fichas sin una sola
+   * fuente justo cuando más falta hacían.
+   */
+  evidenceMode: ClefMode;
   chatExtractor: boolean;
   rerank: "nan" | "local";
   wikipedia: boolean;

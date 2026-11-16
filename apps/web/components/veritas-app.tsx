@@ -40,7 +40,10 @@ export default function VeritasApp() {
           <span>Live</span>
         </div>
         {config ? (
-          <span className={`mode-chip ${config.clefMode === "live" ? "live" : ""}`}>
+          <span
+            className={`mode-chip ${config.clefMode === "live" ? "live" : ""}`}
+            title={config.clefNote ?? undefined}
+          >
             <i className="dot" />
             {config.clefMode === "live" ? "clef en vivo" : "clef simulado"}
           </span>
@@ -73,6 +76,12 @@ export default function VeritasApp() {
         )}
       </header>
 
+      {config?.clefNote ? (
+        <div className="notice-banner">
+          <span>{config.clefNote}</span>
+        </div>
+      ) : null}
+
       {session.error ? (
         <div className="error-banner">
           <span>{session.error}</span>
@@ -87,17 +96,7 @@ export default function VeritasApp() {
       ) : (
         <main className={`live${video ? " with-stage" : ""}`}>
           <div className="stage-col">
-            {video ? (
-              <YoutubeStage
-                video={video}
-                phase={phase}
-                onStart={() => void session.startTab({ preferCurrentTab: true })}
-                onChange={() => {
-                  setVideo(null);
-                  session.reset();
-                }}
-              />
-            ) : null}
+            {video ? <YoutubeStage video={video} /> : null}
             <section className="transcript-col" aria-label="Transcripción">
             <div className="col-head">
               <span className="col-title">Transcripción</span>
@@ -165,12 +164,6 @@ export default function VeritasApp() {
                 {resolvedCount}/{claims.length} analizadas
               </span>
             </div>
-            <p className="claims-sub">
-              Una ficha por cada frase que se puede comprobar, con sus fuentes al lado. Cuando no dan para
-              zanjar el asunto, el veredicto sale marcado como provisional en vez de fingir una certeza que
-              no hay.
-            </p>
-
             <div className="queue-strip">
               <span>
                 clef <strong>{snapshot?.queue.inFlight ?? 0}</strong> en curso
@@ -193,10 +186,23 @@ export default function VeritasApp() {
             </div>
 
             {claims.length === 0 ? (
-              <div className="empty-state">
-                <strong>Sin afirmaciones todavía</strong>
-                Las frases verificables aparecerán aquí en cuanto lleguen con suficiente contexto.
-              </div>
+              phase === "setup" || phase === "error" ? (
+                <div className="empty-state">
+                  <button
+                    type="button"
+                    className="btn"
+                    onClick={() => void session.startTab({ preferCurrentTab: true })}
+                  >
+                    Empezar a verificar
+                  </button>
+                </div>
+              ) : phase === "starting" || phase === "finishing" ? (
+                <div className="empty-state">
+                  <button type="button" className="btn" disabled>
+                    {phase === "finishing" ? "Cerrando…" : "Preparando…"}
+                  </button>
+                </div>
+              ) : null
             ) : (
               <div className="claim-list">
                 {claims.map((claim) => (
@@ -204,13 +210,6 @@ export default function VeritasApp() {
                 ))}
               </div>
             )}
-
-            {phase === "done" ? (
-              <p className="fineprint">
-                Sesión cerrada. {resolvedCount} de {claims.length} afirmaciones quedaron analizadas; el resto
-                sigue visible con su estado real, no se rellena con una respuesta inventada.
-              </p>
-            ) : null}
           </section>
         </main>
       )}
