@@ -72,3 +72,35 @@ export function needsMoreThreshold(model: string | undefined): number {
   }
   return NEEDS_MORE_DEFAULT;
 }
+
+/**
+ * Umbrales del gate por modelo. Tampoco son transferibles.
+ *
+ * Medido sobre catorce fragmentos reales etiquetados a mano: con Jev el ruido
+ * puntúa `factual` entre 0,10 y 0,75 y lo publicable entre 0,81 y 0,94, así
+ * que el corte cae en el hueco. Con el 0,6 calibrado para Clef entraban
+ * anécdotas personales como «mis abuelos no sabían leer ni escribir» (0,75).
+ *
+ * La precisión sigue SIN filtrar, también con Jev. Sobre frases limpias
+ * parecía separar (ruido hasta 0,16, señal desde 0,20), pero sobre el texto
+ * crudo del ASR se desploma incluso en afirmaciones buenas: «15 años hemos
+ * tardado en revertir esos recortes» puntúa 0,11 y «hemos multiplicado por
+ * veinte la inversión» 0,17. Medido: filtrar ahí costaba dos de las seis
+ * afirmaciones de referencia del banco.
+ *
+ * Catorce casos son pocos: conviene rehacerlo sobre capturas completas.
+ */
+export type GateThresholds = { factual: number; precision: number };
+
+const GATE_DEFAULT: GateThresholds = { factual: 0.6, precision: 0 };
+const GATE_BY_MODEL: Array<[RegExp, GateThresholds]> = [
+  [/^jev/i, { factual: 0.78, precision: 0 }],
+];
+
+export function gateThresholds(model: string | undefined): GateThresholds {
+  if (!model) return GATE_DEFAULT;
+  for (const [pattern, value] of GATE_BY_MODEL) {
+    if (pattern.test(model)) return value;
+  }
+  return GATE_DEFAULT;
+}

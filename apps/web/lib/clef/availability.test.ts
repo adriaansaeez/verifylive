@@ -50,3 +50,19 @@ describe("cadena de evaluadores", () => {
     expect(runtimeConfig().decider).toBe("Jev · TypeSafe");
   });
 });
+
+describe("umbrales del gate por modelo", () => {
+  it("exige más a Jev en factual, porque su escala es otra", async () => {
+    const { gateThresholds } = await import("@/lib/clef/providers");
+    expect(gateThresholds("jev-1.14.0").factual).toBe(0.78);
+    expect(gateThresholds("clef").factual).toBe(0.6);
+  });
+
+  it("no filtra por precisión con ningún modelo", async () => {
+    const { gateThresholds } = await import("@/lib/clef/providers");
+    // Sobre texto crudo del ASR la precisión se desploma incluso en
+    // afirmaciones buenas: filtrar ahí costaba dos de las seis de referencia.
+    expect(gateThresholds("jev-1.14.0").precision).toBe(0);
+    expect(gateThresholds("clef").precision).toBe(0);
+  });
+});

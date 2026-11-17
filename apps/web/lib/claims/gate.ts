@@ -3,6 +3,7 @@ import { clefQueue } from "@/lib/clef/queue";
 import type { ClaimCandidate } from "@/lib/claims/claim-window";
 import { isSpeechAct } from "@/lib/claims/heuristic";
 import { clamp01, fnv1a, tokenize } from "@/lib/text";
+import { gateThresholds } from "@/lib/clef/providers";
 
 /**
  * Claim gate.
@@ -176,10 +177,14 @@ export function scoreGate(
   });
 }
 
-export function passesGate(entry: GateScore): boolean {
+export function passesGate(entry: GateScore, model?: string): boolean {
+  // Los cortes dependen de quién respondió: cada evaluador puntúa en su propia
+  // escala y con la de Clef entraban anécdotas personales.
+  const limits = gateThresholds(model);
   return (
     entry.closed >= GATE_MIN_CLOSED &&
-    entry.factual >= GATE_MIN_FACTUAL &&
+    entry.factual >= limits.factual &&
+    entry.precision >= limits.precision &&
     entry.score >= GATE_MIN_SCORE
   );
 }
@@ -190,8 +195,8 @@ export function passesGate(entry: GateScore): boolean {
  * preferred short truncated spans. Length now wins outright whenever the two
  * scores are within the tie margin.
  */
-export function selectGated(scores: GateScore[]): GateScore | null {
-  const passing = scores.filter(passesGate);
+export function selectGated(scores: GateScore[], model?: string): GateScore | null {
+  const passing = scores.filter((entry) => passesGate(entry, model));
   if (passing.length === 0) return null;
   const best = passing.reduce((left, right) => (right.score > left.score ? right : left));
   const contenders = passing.filter((entry) => best.score - entry.score <= GATE_TIE_MARGIN);
@@ -223,7 +228,7 @@ export async function runGate(candidates: ClaimCandidate[]): Promise<GateResult>
       run: () => callClefRaw(buildGateState(eligible), buildGateQuestions(eligible)),
     });
     const scores = scoreGate(eligible, raw.answers);
-    return { selected: selectGated(scores), scores, skipped: false, failed: false };
+    return { selected: selectGated(scores, raw.model), scores, skipped: false, failed: false };
   } catch {
     // Tragarse el error y devolver «ninguna» hacía que un Clef caído se
     // pareciese a una conversación sin nada que comprobar.
