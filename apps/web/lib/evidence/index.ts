@@ -1,4 +1,5 @@
 import { MAX_EVIDENCE, activeSearchProvider, runtimeConfig } from "@/lib/config";
+import { redactSecrets } from "@/lib/redact";
 import { corpusEntries, type CorpusEntry } from "@/lib/fixtures";
 import type { ClefMode, ConnectorReport, EvidenceCandidate } from "@/lib/types";
 import { jaccard, normalizeText, tokenCoverage, tokenize } from "@/lib/text";
@@ -106,7 +107,8 @@ async function runConnector(name: string, work: () => Promise<EvidenceCandidate[
     return {
       name,
       candidates: [],
-      error: error instanceof Error ? error.message : "error desconocido",
+      // Se guarda en los diagnósticos y la API los devuelve, así que va limpio.
+      error: redactSecrets(error instanceof Error ? error.message : "error desconocido"),
       ms: Date.now() - started,
     };
   }

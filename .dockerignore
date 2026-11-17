@@ -1,5 +1,16 @@
+# Nunca al contexto de build: la etapa `build` copia apps/web/ entero y
+# cualquier .env acabaría en una capa de la imagen.
+.env
+.env.*
+**/.env
+**/.env.*
+*.pem
+*.key
+
 node_modules
+**/node_modules
 .next
+**/.next
 .git
 brand
 assets

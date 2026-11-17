@@ -41,6 +41,7 @@ import type {
   ExtractedClaim,
 } from "@/lib/types";
 import { clip, fnv1a, normalizeText, sanitizeUntrusted, splitSentences } from "@/lib/text";
+import { redactSecrets } from "@/lib/redact";
 import { publish } from "@/lib/events";
 import { applyVerdictPolicy, simulatedVerdict } from "@/lib/verdict/policy";
 
@@ -365,7 +366,8 @@ async function analyze(
   try {
     await resolveClaim(claim, gate, warmup);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Error de análisis";
+    // El mensaje se guarda en la ficha y se enseña: nunca con una clave dentro.
+    const message = redactSecrets(error instanceof Error ? error.message : "Error de análisis");
     const failed = updateClaimStatus(claim.id, "failed", { error: message, incrementAttempts: true });
     if (failed) emit(failed.sessionId, { type: "claim.failed", claim: failed, error: message });
   }
