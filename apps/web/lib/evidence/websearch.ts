@@ -240,7 +240,13 @@ async function searchBrave(query: string): Promise<SearchHit[]> {
     {
       timeoutMs: CONNECTOR_TIMEOUT_MS,
       maxBytes: 600_000,
-      headers: { "User-Agent": USER_AGENT, "X-Subscription-Token": key },
+      // Brave valida la cabecera y rechaza el Accept por defecto, pensado
+      // para raspar páginas: solo admite application/json o */*.
+      headers: {
+        "User-Agent": USER_AGENT,
+        "X-Subscription-Token": key,
+        Accept: "application/json",
+      },
     },
   );
 

@@ -125,9 +125,12 @@ export async function safeFetchText(
   const trusted = options.trustedOrigin === true;
   let current = await assertSafeUrl(rawUrl, { trustedOrigin: trusted });
   const trustedOrigin = trusted ? current.origin : null;
+  // El Accept por defecto sirve para raspar páginas, pero iba después del de
+  // quien llama y lo pisaba: la API de Brave rechazaba la petición con un 422
+  // porque solo admite application/json. Lo explícito manda.
   let headers: Record<string, string> = {
-    ...(options.headers ?? {}),
     Accept: "text/plain, text/html;q=0.9, application/json;q=0.8",
+    ...(options.headers ?? {}),
   };
 
   for (let hop = 0; hop < 4; hop += 1) {
@@ -157,7 +160,14 @@ export async function safeFetchText(
       continue;
     }
 
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    if (!response.ok) {
+      // El cuerpo explica el motivo: las APIs de búsqueda devuelven 4xx con un
+      // mensaje concreto, y tirarlo dejaba "HTTP 422" sin forma de diagnosticar.
+      const detail = await response.text().catch(() => "");
+      throw new Error(
+        `HTTP ${response.status}${detail ? `: ${detail.slice(0, 600)}` : ""}`,
+      );
+    }
     const declared = Number(response.headers.get("content-length") ?? "0");
     if (declared > maxBytes) throw new UnsafeUrlError("Respuesta demasiado grande");
 
