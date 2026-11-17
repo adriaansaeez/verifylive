@@ -154,6 +154,15 @@ export default function VerifyLiveApp() {
         )}
       </header>
 
+      {session.config && !session.config.chatExtractor ? (
+        <div className="notice-banner">
+          <span>
+            Sin extractor de afirmaciones: se publica la transcripción tal cual, sin recortar la
+            frase ni normalizar las cifras. Define <code>NAN_CHAT_MODEL</code> para activarlo.
+          </span>
+        </div>
+      ) : null}
+
       {session.error ? (
         <div className="error-banner">
           <span>{session.error}</span>

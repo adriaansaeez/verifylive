@@ -257,6 +257,7 @@ Tres ajustes que no son opcionales:
 | **Réplicas** | **1** | La cola del evaluador y el bus de eventos viven en el proceso. Con dos réplicas, el navegador se conecta a una y las fichas se generan en la otra: la pantalla se queda vacía. |
 | **Almacenamiento** | un volumen en `/data` | La base de datos vive ahí. Sin volumen, cada despliegue borra las sesiones. |
 | **Variables** | `NAN_KEY` o `TYPESAFE_API_KEY` | Sin ninguna arranca en modo simulado y lo etiqueta como tal. |
+| **Y además** | `NAN_CHAT_MODEL`, `NAN_RERANK_URL`, `NAN_RERANK_MODEL` | Sin `NAN_CHAT_MODEL` no hay extractor: se publica la transcripción cruda, sin recortar la frase ni normalizar las cifras. Es la diferencia entre una ficha legible y un párrafo entero del ASR. |
 
 El buscador autoalojado no viaja en esta imagen. Sin él la app usa el
 buscador sin clave, que encuentra menos fuentes relevantes; si quieres
