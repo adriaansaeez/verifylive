@@ -201,13 +201,27 @@ spikes/parakeet-browser/  Spike que valida Parakeet en WebGPU
 
 ## Arranque rápido
 
-Requisitos: **Node ≥ 22** (usa `node:sqlite`), **Chrome/Chromium** (WebGPU,
-micrófono y `getDisplayMedia`) y npm.
+Desde la raíz del repositorio, un solo comando:
+
+```bash
+npm start
+```
+
+Comprueba la versión de Node, instala lo que falte, crea el `.env.local`,
+levanta el buscador si encuentra Docker, busca un puerto libre y arranca.
+Lo que no puede resolver te lo dice antes de empezar, no a mitad.
+
+Necesitas **Node ≥ 22** (la app usa `node:sqlite`) y **Chrome o Edge**: la
+transcripción corre en WebGPU y la captura usa `getDisplayMedia`, así que el
+navegador no es opcional. La primera captura descarga el modelo de voz
+(~1,3 GB) y lo deja en caché.
+
+A mano, si lo prefieres:
 
 ```bash
 cd apps/web
 npm install
-cp env.example .env.local   # opcional: NAN_KEY y proveedores
+cp env.example .env.local
 npm run dev                 # http://localhost:3000
 ```
 
@@ -307,3 +321,11 @@ Conviene saberlo antes de confiar en ninguna pantalla:
 - **Parakeet TDT 0.6B v3** — NVIDIA, ejecutado en el navegador con `browser-whisper`.
 - **Next.js**, **React**, **SQLite (`node:sqlite`)** y **SearXNG**.
 - Corpus y discurso de demo: ficticios, creados para el MVP.
+
+---
+
+<p align="center">
+  <a href="https://nan.builders/?ref=built-with-nan">
+    <img width="266" src="https://nan.builders/badge/built-with-nan-light.svg" alt="Built with NaN" />
+  </a>
+</p>

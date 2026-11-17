@@ -1,0 +1,10 @@
+{
+  "name": "verifylive",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node scripts/start.mjs",
+    "setup": "node scripts/start.mjs",
+    "test": "npm --prefix apps/web run check"
+  }
+}
