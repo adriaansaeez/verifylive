@@ -51,7 +51,7 @@ describe("hitMatchesQuery", () => {
 
 describe("searchWeb", () => {
   it("keeps the fallback provider and classifies each result URL", async () => {
-    vi.stubEnv("VERITAS_SEARCH_PROVIDER", "google");
+    vi.stubEnv("VERIFYLIVE_SEARCH_PROVIDER", "google");
     vi.stubEnv("GOOGLE_API_KEY", "test-key");
     vi.stubEnv("GOOGLE_CSE_ID", "test-cx");
     const longDescription = "clima prueba fallback ".repeat(15);
@@ -74,7 +74,7 @@ describe("searchWeb", () => {
   });
 
   it("drops ticket shops and aggregators, whatever the keywords match", async () => {
-    vi.stubEnv("VERITAS_SEARCH_PROVIDER", "bingnews");
+    vi.stubEnv("VERIFYLIVE_SEARCH_PROVIDER", "bingnews");
     const description = "AVE Madrid Ourense billetes y horarios ".repeat(8);
     vi.mocked(safeFetchText).mockImplementation(async (url) => ({
       url,

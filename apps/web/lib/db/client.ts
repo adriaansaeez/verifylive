@@ -129,22 +129,22 @@ function schemaVersionOf(db: DatabaseSync): number {
   return Number(row?.user_version ?? 0);
 }
 
-type GlobalWithDb = typeof globalThis & { __veritasDb?: DatabaseSync };
+type GlobalWithDb = typeof globalThis & { __verifyliveDb?: DatabaseSync };
 
 function databasePath(): string {
-  const configured = process.env.VERITAS_DB?.trim();
+  const configured = process.env.VERIFYLIVE_DB?.trim();
   // This is runtime state, not a build input. The narrow Turbopack annotation
   // prevents tracing the whole project while preserving a configurable path.
   if (configured) return path.resolve(/* turbopackIgnore: true */ process.cwd(), configured);
   // Keep the database OUTSIDE the project tree: Turbopack watches every file
   // under it, so SQLite writes (.sqlite-wal grows on each commit) trigger a
   // recompile, which reloads the page, which writes again — an infinite loop.
-  return path.join(os.homedir(), ".cache", "veritas-live", "veritas.sqlite");
+  return path.join(os.homedir(), ".cache", "verifylive", "verifylive.sqlite");
 }
 
 export function getDb(): DatabaseSync {
   const globalStore = globalThis as GlobalWithDb;
-  const existing = globalStore.__veritasDb;
+  const existing = globalStore.__verifyliveDb;
   if (existing) {
     // Cheap on every call, and the only thing that catches a schema edited
     // while this connection was already open.
@@ -160,7 +160,7 @@ export function getDb(): DatabaseSync {
   db.exec("PRAGMA foreign_keys = ON;");
   db.exec("PRAGMA busy_timeout = 5000;");
   migrate(db);
-  globalStore.__veritasDb = db;
+  globalStore.__verifyliveDb = db;
   return db;
 }
 

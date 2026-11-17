@@ -18,7 +18,7 @@ export type CaptureOptions = {
 };
 
 const WORKLET_SOURCE = `
-class VeritasChunker extends AudioWorkletProcessor {
+class VerifyLiveChunker extends AudioWorkletProcessor {
   constructor(options) {
     super();
     this.frames = (options && options.processorOptions && options.processorOptions.frames) || 16000;
@@ -56,7 +56,7 @@ class VeritasChunker extends AudioWorkletProcessor {
     return true;
   }
 }
-registerProcessor("veritas-chunker", VeritasChunker);
+registerProcessor("verifylive-chunker", VerifyLiveChunker);
 `;
 
 /**
@@ -167,7 +167,7 @@ async function attachStream(
   const workletUrl = URL.createObjectURL(new Blob([WORKLET_SOURCE], { type: "application/javascript" }));
   await context.audioWorklet.addModule(workletUrl);
 
-  const node = new AudioWorkletNode(context, "veritas-chunker", {
+  const node = new AudioWorkletNode(context, "verifylive-chunker", {
     numberOfInputs: 1,
     numberOfOutputs: 0,
     processorOptions: { frames: Math.round((sampleRate * chunkMs) / 1000) },

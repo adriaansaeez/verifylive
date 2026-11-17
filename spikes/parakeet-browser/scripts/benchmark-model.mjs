@@ -2,7 +2,7 @@ import { chromium } from "playwright-core";
 
 const executablePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const baseURL = process.env.SPIKE_URL ?? "http://127.0.0.1:5173";
-const profilePath = process.env.SPIKE_PROFILE ?? "/tmp/veritas-parakeet-chrome-profile";
+const profilePath = process.env.SPIKE_PROFILE ?? "/tmp/verifylive-parakeet-chrome-profile";
 const timeoutMs = Number(process.env.SPIKE_TIMEOUT_MS ?? 15 * 60 * 1000);
 const quantization = process.env.SPIKE_QUANTIZATION ?? "fp16";
 

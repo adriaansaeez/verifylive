@@ -1,4 +1,4 @@
-# SearXNG para Veritas Live.
+# SearXNG para VerifyLive.
 #
 # Metabuscador local: una petición consulta varios motores a la vez y devuelve
 # la URL del medio, un extracto real y la fecha, sin ninguna clave de API.
@@ -11,13 +11,13 @@
 use_default_settings: true
 
 general:
-  instance_name: "Veritas Live"
+  instance_name: "VerifyLive"
   # Sin métricas ni página de estadísticas: esto no es un servicio público.
   enable_metrics: false
 
 server:
   # Local únicamente. Si algún día se publica, cámbialo por un secreto real.
-  secret_key: "veritas-live-local-only-change-me"
+  secret_key: "verifylive-local-only-change-me"
   limiter: false
   public_instance: false
   image_proxy: false

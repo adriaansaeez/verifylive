@@ -12,9 +12,9 @@ afterEach(() => {
 });
 
 describe("gatherEvidence", () => {
-  it("does not schedule Wikipedia when VERITAS_ENABLE_WIKIPEDIA is disabled", async () => {
-    vi.stubEnv("VERITAS_ENABLE_WIKIPEDIA", "false");
-    vi.stubEnv("VERITAS_SEARCH_PROVIDER", "none");
+  it("does not schedule Wikipedia when VERIFYLIVE_ENABLE_WIKIPEDIA is disabled", async () => {
+    vi.stubEnv("VERIFYLIVE_ENABLE_WIKIPEDIA", "false");
+    vi.stubEnv("VERIFYLIVE_SEARCH_PROVIDER", "none");
 
     const result = await gatherEvidence(
       { text: "Afirmación zafiro quasar sin corpus", searchQueries: ["zafiro quasar"] },
@@ -26,8 +26,8 @@ describe("gatherEvidence", () => {
   });
 
   it("schedules Wikipedia when the flag is enabled", async () => {
-    vi.stubEnv("VERITAS_ENABLE_WIKIPEDIA", "true");
-    vi.stubEnv("VERITAS_SEARCH_PROVIDER", "none");
+    vi.stubEnv("VERIFYLIVE_ENABLE_WIKIPEDIA", "true");
+    vi.stubEnv("VERIFYLIVE_SEARCH_PROVIDER", "none");
 
     await gatherEvidence(
       { text: "Afirmación ámbar nebula sin corpus", searchQueries: ["ámbar nebula"] },

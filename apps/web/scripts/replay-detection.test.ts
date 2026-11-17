@@ -6,9 +6,9 @@
  * thresholds were calibrated: the fixture is the actual Parakeet output from a
  * tab capture, duplicated tails and ASR garble included.
  *
- *   VERITAS_REPLAY=1 npx vitest run scripts/replay-detection.test.ts
+ *   VERIFYLIVE_REPLAY=1 npx vitest run scripts/replay-detection.test.ts
  *
- * It calls the real NaN endpoint, so it is skipped unless VERITAS_REPLAY is
+ * It calls the real NaN endpoint, so it is skipped unless VERIFYLIVE_REPLAY is
  * set. Expected claims are asserted loosely: the point is to catch a drop in
  * recall, not to freeze one exact wording.
  */
@@ -54,7 +54,7 @@ const EXPECTED = [
   ["AVE Madrid Ourense y Madrid Murcia", ["ave", "ourense"]],
 ] as const;
 
-const enabled = process.env.VERITAS_REPLAY === "1" && Boolean(process.env.NAN_KEY?.trim());
+const enabled = process.env.VERIFYLIVE_REPLAY === "1" && Boolean(process.env.NAN_KEY?.trim());
 
 type Segment = { seq: number; startMs: number; endMs: number; text: string };
 

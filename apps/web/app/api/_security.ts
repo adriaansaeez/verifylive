@@ -1,14 +1,14 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 
-const ACCESS_COOKIE = "veritas_access";
+const ACCESS_COOKIE = "verifylive_access";
 const DEFAULT_WINDOW_MS = 60_000;
 const DEFAULT_IP_LIMIT = 120;
 const DEFAULT_SESSION_LIMIT = 90;
 
 type Bucket = { count: number; resetAt: number };
 type GlobalWithRateLimits = typeof globalThis & {
-  __veritasRateLimits?: Map<string, Bucket>;
+  __verifyliveRateLimits?: Map<string, Bucket>;
 };
 
 type MutationGuardOptions = {
@@ -23,12 +23,12 @@ function positiveInteger(name: string, fallback: number): number {
 
 function rateBuckets(): Map<string, Bucket> {
   const store = globalThis as GlobalWithRateLimits;
-  store.__veritasRateLimits ??= new Map();
-  return store.__veritasRateLimits;
+  store.__verifyliveRateLimits ??= new Map();
+  return store.__verifyliveRateLimits;
 }
 
 function accessDigest(token: string): string {
-  return createHmac("sha256", token).update("veritas-live-access-v1").digest("base64url");
+  return createHmac("sha256", token).update("verifylive-access-v1").digest("base64url");
 }
 
 function equalSecret(received: string, expected: string): boolean {
@@ -49,11 +49,11 @@ function cookieValue(request: Request, name: string): string | null {
 function bearerToken(request: Request): string | null {
   const authorization = request.headers.get("authorization") ?? "";
   const match = /^Bearer\s+(.+)$/i.exec(authorization);
-  return match?.[1]?.trim() || request.headers.get("x-veritas-token")?.trim() || null;
+  return match?.[1]?.trim() || request.headers.get("x-verifylive-token")?.trim() || null;
 }
 
 function authorized(request: Request): boolean {
-  const expected = process.env.VERITAS_API_TOKEN?.trim();
+  const expected = process.env.VERIFYLIVE_API_TOKEN?.trim();
   if (!expected) return true;
 
   const supplied = bearerToken(request);
@@ -64,7 +64,7 @@ function authorized(request: Request): boolean {
 }
 
 function clientIp(request: Request): string {
-  if (!/^(1|true|yes|on)$/i.test(process.env.VERITAS_TRUST_PROXY ?? "")) {
+  if (!/^(1|true|yes|on)$/i.test(process.env.VERIFYLIVE_TRUST_PROXY ?? "")) {
     return "untrusted-proxy";
   }
   const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
@@ -104,9 +104,9 @@ export function protectMutation(
   }
 
   const now = Date.now();
-  const windowMs = positiveInteger("VERITAS_RATE_WINDOW_MS", DEFAULT_WINDOW_MS);
-  const ipLimit = positiveInteger("VERITAS_RATE_IP_LIMIT", DEFAULT_IP_LIMIT);
-  const sessionLimit = positiveInteger("VERITAS_RATE_SESSION_LIMIT", DEFAULT_SESSION_LIMIT);
+  const windowMs = positiveInteger("VERIFYLIVE_RATE_WINDOW_MS", DEFAULT_WINDOW_MS);
+  const ipLimit = positiveInteger("VERIFYLIVE_RATE_IP_LIMIT", DEFAULT_IP_LIMIT);
+  const sessionLimit = positiveInteger("VERIFYLIVE_RATE_SESSION_LIMIT", DEFAULT_SESSION_LIMIT);
   const ipReset = consume(`ip:${clientIp(request)}:${options.scope}`, ipLimit, now, windowMs);
   if (ipReset) return rateLimited(ipReset);
 
@@ -124,8 +124,8 @@ export function protectMutation(
 
 /** Exchanges a user-supplied demo token for a same-origin HttpOnly cookie. */
 export function createAccessCookie(request: Request, token: string): NextResponse {
-  const windowMs = positiveInteger("VERITAS_RATE_WINDOW_MS", DEFAULT_WINDOW_MS);
-  const attemptLimit = positiveInteger("VERITAS_ACCESS_ATTEMPT_LIMIT", 10);
+  const windowMs = positiveInteger("VERIFYLIVE_RATE_WINDOW_MS", DEFAULT_WINDOW_MS);
+  const attemptLimit = positiveInteger("VERIFYLIVE_ACCESS_ATTEMPT_LIMIT", 10);
   const resetAt = consume(
     `access:${clientIp(request)}`,
     attemptLimit,
@@ -134,7 +134,7 @@ export function createAccessCookie(request: Request, token: string): NextRespons
   );
   if (resetAt) return rateLimited(resetAt);
 
-  const expected = process.env.VERITAS_API_TOKEN?.trim();
+  const expected = process.env.VERIFYLIVE_API_TOKEN?.trim();
   if (expected && !equalSecret(token, expected)) {
     return NextResponse.json(
       { error: "token de acceso inválido" },
@@ -156,5 +156,5 @@ export function createAccessCookie(request: Request, token: string): NextRespons
 }
 
 export function resetRateLimitsForTests(): void {
-  (globalThis as GlobalWithRateLimits).__veritasRateLimits?.clear();
+  (globalThis as GlobalWithRateLimits).__verifyliveRateLimits?.clear();
 }

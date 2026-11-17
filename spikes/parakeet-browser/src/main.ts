@@ -118,7 +118,7 @@ const report: SpikeReport = {
 
 // Deliberate test seam used by the Playwright benchmark scripts. It exposes metrics, never audio.
 Object.assign(globalThis, {
-  __VERITAS_SPIKE_REPORT__: () => JSON.parse(JSON.stringify(report)) as SpikeReport,
+  __VERIFYLIVE_SPIKE_REPORT__: () => JSON.parse(JSON.stringify(report)) as SpikeReport,
 });
 
 function nowIso(): string {

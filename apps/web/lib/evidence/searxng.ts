@@ -16,7 +16,7 @@ import { safeFetchText } from "./ssrf";
  * eight (mean relevance 0.93 against 0.66 for the Bing news RSS fallback),
  * and the only one that surfaced primary sources such as lamoncloa.gob.es.
  *
- * It is optional on purpose: without `VERITAS_SEARXNG_URL` the app falls back
+ * It is optional on purpose: without `VERIFYLIVE_SEARXNG_URL` the app falls back
  * to the keyless RSS providers and still runs with zero setup.
  */
 
@@ -86,7 +86,7 @@ function hostOf(rawUrl: string): string | null {
 }
 
 export function searxngBaseUrl(): string | null {
-  const configured = process.env.VERITAS_SEARXNG_URL?.trim();
+  const configured = process.env.VERIFYLIVE_SEARXNG_URL?.trim();
   if (!configured) return null;
   try {
     return new URL(configured).toString().replace(/\/$/u, "");
@@ -103,7 +103,7 @@ export async function searchSearxng(query: string): Promise<EvidenceCandidate[]>
   const params = new URLSearchParams({
     q: trimmed,
     format: "json",
-    language: process.env.VERITAS_SEARXNG_LANGUAGE?.trim() || "es",
+    language: process.env.VERIFYLIVE_SEARXNG_LANGUAGE?.trim() || "es",
     safesearch: "0",
   });
 

@@ -45,15 +45,15 @@ import { publish } from "@/lib/events";
 import { applyVerdictPolicy, simulatedVerdict } from "@/lib/verdict/policy";
 
 type GlobalWithWork = typeof globalThis & {
-  __veritasActive?: Map<string, Set<Promise<unknown>>>;
+  __verifyliveActive?: Map<string, Set<Promise<unknown>>>;
 };
 
 const MAX_RETRIES = 3;
 
 function activeMap(): Map<string, Set<Promise<unknown>>> {
   const store = globalThis as GlobalWithWork;
-  store.__veritasActive ??= new Map();
-  return store.__veritasActive;
+  store.__verifyliveActive ??= new Map();
+  return store.__verifyliveActive;
 }
 
 function track(sessionId: string, work: Promise<unknown>): void {
@@ -98,7 +98,7 @@ const limitEvidence = createLimiter(3);
 function startWarmupSearch(quote: string, mode: ClefMode): Promise<WarmupResult> | null {
   if (mode !== "live") return null;
   // An off switch for measuring, and for the day a provider misbehaves.
-  if (process.env.VERITAS_WARMUP_SEARCH === "false") return null;
+  if (process.env.VERIFYLIVE_WARMUP_SEARCH === "false") return null;
   const query = buildQueries(quote)[0];
   if (!query) return null;
   const started = Date.now();

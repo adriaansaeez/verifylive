@@ -34,7 +34,7 @@ export function runtimeConfig(): RuntimeConfig {
     evidenceMode: nanKey || configured.length > 0 ? "live" : "simulated",
     chatExtractor: Boolean(process.env.NAN_CHAT_MODEL?.trim() && nanKey),
     rerank: rerankConfigured && nanKey ? "nan" : "local",
-    wikipedia: flag("VERITAS_ENABLE_WIKIPEDIA", true),
+    wikipedia: flag("VERIFYLIVE_ENABLE_WIKIPEDIA", true),
     jina: Boolean(process.env.JINA_API_KEY?.trim()),
     cloudEvidence: Boolean(process.env.JINA_API_KEY?.trim()),
     search: activeSearchProvider(),
@@ -52,11 +52,11 @@ const PROVIDERS = new Set<string>(["searxng", "google", "brave", "bingnews", "bi
  * news RSS, and it is the only option that returns publisher URLs, snippets
  * and dates together without an API key. Google's Custom Search and Brave
  * come next when a key exists, and the RSS providers keep the app working
- * with zero setup. `VERITAS_SEARCH_PROVIDER=none` disables web search.
+ * with zero setup. `VERIFYLIVE_SEARCH_PROVIDER=none` disables web search.
  */
 export function activeSearchProvider(): SearchProvider | null {
-  const forced = process.env.VERITAS_SEARCH_PROVIDER?.trim().toLowerCase();
-  const hasSearxng = Boolean(process.env.VERITAS_SEARXNG_URL?.trim());
+  const forced = process.env.VERIFYLIVE_SEARCH_PROVIDER?.trim().toLowerCase();
+  const hasSearxng = Boolean(process.env.VERIFYLIVE_SEARXNG_URL?.trim());
   const hasGoogle = Boolean(
     process.env.GOOGLE_API_KEY?.trim() && process.env.GOOGLE_CSE_ID?.trim(),
   );
@@ -97,13 +97,13 @@ export const MAX_EXCERPT_CHARS = 1_500;
 /** SearXNG returns 40+ merged results; the reranker does the rest. */
 export const SEARXNG_RESULTS = Math.min(
   20,
-  Math.max(1, Number.parseInt(process.env.VERITAS_SEARXNG_RESULTS ?? "8", 10) || 8),
+  Math.max(1, Number.parseInt(process.env.VERIFYLIVE_SEARXNG_RESULTS ?? "8", 10) || 8),
 );
 
 /** How many web results to ask the search provider for. */
 export const WEB_RESULTS = Math.min(
   5,
-  Math.max(1, Number.parseInt(process.env.VERITAS_WEB_RESULTS ?? "3", 10) || 3),
+  Math.max(1, Number.parseInt(process.env.VERIFYLIVE_WEB_RESULTS ?? "3", 10) || 3),
 );
 export const MIN_CHECKABLE = 0.65;
 export const MIN_CONFIDENCE = 0.65;

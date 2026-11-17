@@ -19,7 +19,7 @@ const VERDICT_PLURAL: Record<Verdict, string> = {
   unverifiable: "No verificables",
 };
 
-export default function VeritasApp() {
+export default function VerifyLiveApp() {
   const session = useSession();
   const [openClaimId, setOpenClaimId] = useState<string | null>(null);
   const [video, setVideo] = useState<YoutubeRef | null>(null);
@@ -116,7 +116,7 @@ export default function VeritasApp() {
       <header className="masthead">
         <div className="wordmark">
           <JudgeMark className="wordmark-mark" />
-          <strong>Veritas</strong>
+          <strong>VerifyLive</strong>
           <span>Live</span>
         </div>
         <span className="masthead-spacer" />
@@ -339,7 +339,7 @@ function Setup({ session, onVideo }: SetupProps) {
             Que no te la <em>cuelen</em>.
           </h1>
           <p className="lede">
-            Pon un debate, un mitin o una entrevista. Veritas escucha, se queda con lo que de verdad se
+            Pon un debate, un mitin o una entrevista. VerifyLive escucha, se queda con lo que de verdad se
             puede comprobar y te enseña, mientras hablan, qué fuentes lo respaldan o lo desmienten. Con el
             enlace, para que lo mires tú.
           </p>

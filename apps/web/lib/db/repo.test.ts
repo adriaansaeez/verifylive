@@ -6,14 +6,14 @@ import { join } from "node:path";
 let dir: string;
 
 beforeEach(() => {
-  dir = mkdtempSync(join(tmpdir(), "veritas-repo-"));
-  process.env.VERITAS_DB = join(dir, "test.sqlite");
-  delete (globalThis as { __veritasDb?: unknown }).__veritasDb;
+  dir = mkdtempSync(join(tmpdir(), "verifylive-repo-"));
+  process.env.VERIFYLIVE_DB = join(dir, "test.sqlite");
+  delete (globalThis as { __verifyliveDb?: unknown }).__verifyliveDb;
 });
 
 afterEach(() => {
-  delete (globalThis as { __veritasDb?: unknown }).__veritasDb;
-  delete process.env.VERITAS_DB;
+  delete (globalThis as { __verifyliveDb?: unknown }).__verifyliveDb;
+  delete process.env.VERIFYLIVE_DB;
   rmSync(dir, { recursive: true, force: true });
 });
 

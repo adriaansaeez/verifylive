@@ -1,4 +1,4 @@
-# Flujo completo de Veritas Live
+# Flujo completo de VerifyLive
 
 Este documento explica, etapa por etapa, qué entra y qué sale en cada paso y
 dónde vive el código. La idea que lo ordena: **Clef decide; el resto del sistema
@@ -39,7 +39,7 @@ audio o fixture
 |---|---|
 | La app arranca sin ninguna variable de entorno. Sin `NAN_KEY`, Clef no se llama y todo se marca como **simulado**. | `apps/web/lib/config.ts` |
 | `/api/config` publica solo capacidades (`clefMode`, `rerank`, `search`, conectores activos), nunca secretos. | `apps/web/app/api/config/route.ts` |
-| Si `VERITAS_API_TOKEN` está definido, las rutas mutantes exigen un token intercambiado por una cookie `HttpOnly` en `/api/access`. Cuotas en memoria por IP y sesión. | `apps/web/app/api/_security.ts`, `apps/web/app/api/access/route.ts` |
+| Si `VERIFYLIVE_API_TOKEN` está definido, las rutas mutantes exigen un token intercambiado por una cookie `HttpOnly` en `/api/access`. Cuotas en memoria por IP y sesión. | `apps/web/app/api/_security.ts`, `apps/web/app/api/access/route.ts` |
 
 ## Etapa 1 — Captura y transcripción local
 
@@ -95,9 +95,9 @@ guionizado de 90 s (`apps/web/fixtures/transcripts/demo.json`).
 **Qué pasa:**
 
 1. **Wikipedia** (servidor) aporta definición y contexto.
-2. **Buscador web**: por defecto SearXNG autoalojado si `VERITAS_SEARXNG_URL` existe; si no, Google Custom Search o Brave con clave; si no, RSS de Bing Noticias sin clave. Una sola petición a SearXNG consulta varios motores y devuelve URL del medio, extracto y fecha, sin claves.
+2. **Buscador web**: por defecto SearXNG autoalojado si `VERIFYLIVE_SEARXNG_URL` existe; si no, Google Custom Search o Brave con clave; si no, RSS de Bing Noticias sin clave. Una sola petición a SearXNG consulta varios motores y devuelve URL del medio, extracto y fecha, sin claves.
 3. **Jina Reader** opcional enriquece el contenido.
-4. **Guard SSRF**: solo HTTP(S), bloquea loopback y redes privadas salvo `VERITAS_ALLOW_PRIVATE_NETWORK=true`.
+4. **Guard SSRF**: solo HTTP(S), bloquea loopback y redes privadas salvo `VERIFYLIVE_ALLOW_PRIVATE_NETWORK=true`.
 5. **Sanitización**: la evidencia remota se trata como datos (`sanitizeUntrusted`) y el prompt la delimita. Si una página contiene instrucciones, no se obedecen.
 6. **Rerank**: el reranker semántico de NaN si está configurado; si no, léxico local. Descarta por debajo de **0,3** y excluye tiendas y agregadores.
 7. **Deduplicación por medio**: `distinctPublishers` evita que cinco copias del mismo cable inflen la confianza.
@@ -157,7 +157,7 @@ Clef decide, pero no se publica a ciegas. `apps/web/lib/verdict/policy.ts` aplic
 | `GET /api/sessions/[id]/stream` | SSE de eventos |
 | `POST /api/sessions/[id]/finish` | cerrar sesión |
 
-**Código:** `apps/web/lib/db/repo.ts`, `apps/web/lib/events.ts`, `apps/web/lib/orchestrator/index.ts`, `apps/web/components/veritas-app.tsx`.
+**Código:** `apps/web/lib/db/repo.ts`, `apps/web/lib/events.ts`, `apps/web/lib/orchestrator/index.ts`, `apps/web/components/verifylive-app.tsx`.
 
 ## Etapa 8 — Cierre y resultados
 

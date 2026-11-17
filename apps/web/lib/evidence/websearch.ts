@@ -26,7 +26,7 @@ type SearchHit = {
   publishedAt: string | null;
 };
 
-const USER_AGENT = "VeritasLive/0.1 (+https://github.com/adriaansaeez/veritas-live; evidence retrieval)";
+const USER_AGENT = "VerifyLive/0.1 (+https://github.com/adriaansaeez/verifylive; evidence retrieval)";
 const CACHE_TTL_MS = 5 * 60_000;
 const CACHE_MAX = 60;
 const ENRICH_LIMIT = 3;
@@ -425,7 +425,7 @@ async function runSearch(provider: SearchProvider, query: string): Promise<Searc
  * nothing: a keyless fallback keeps the demo alive when a quota dies. */
 function providerChain(primary: SearchProvider): SearchProvider[] {
   const order: SearchProvider[] = ["searxng", "google", "brave", "bingnews", "bing", "gdelt"];
-  const hasSearxng = Boolean(process.env.VERITAS_SEARXNG_URL?.trim());
+  const hasSearxng = Boolean(process.env.VERIFYLIVE_SEARXNG_URL?.trim());
   const hasGoogle = Boolean(process.env.GOOGLE_API_KEY?.trim() && process.env.GOOGLE_CSE_ID?.trim());
   const hasBrave = Boolean(process.env.BRAVE_SEARCH_API_KEY?.trim());
   const usable = order.filter((provider) => {

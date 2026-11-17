@@ -4,7 +4,7 @@ import path from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 
 beforeAll(() => {
-  process.env.VERITAS_DB = path.join(os.tmpdir(), `veritas-ingest-${randomUUID()}.sqlite`);
+  process.env.VERIFYLIVE_DB = path.join(os.tmpdir(), `verifylive-ingest-${randomUUID()}.sqlite`);
 });
 
 describe("ingestSegment session state", () => {

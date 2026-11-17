@@ -4,8 +4,8 @@ import { chromium } from "playwright-core";
 
 const executablePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const baseURL = process.env.SPIKE_URL ?? "http://127.0.0.1:5173";
-const profilePath = process.env.SPIKE_PROFILE ?? "/tmp/veritas-parakeet-chrome-profile";
-const inputPath = process.env.SPIKE_AUDIO ?? "/tmp/veritas-spanish.mp3";
+const profilePath = process.env.SPIKE_PROFILE ?? "/tmp/verifylive-parakeet-chrome-profile";
+const inputPath = process.env.SPIKE_AUDIO ?? "/tmp/verifylive-spanish.mp3";
 const timeoutMs = Number(process.env.SPIKE_TIMEOUT_MS ?? 10 * 60 * 1000);
 const quantization = process.env.SPIKE_QUANTIZATION ?? "fp16";
 
@@ -50,7 +50,7 @@ try {
   );
 
   const result = await page.evaluate(() => ({
-    report: globalThis.__VERITAS_SPIKE_REPORT__?.(),
+    report: globalThis.__VERIFYLIVE_SPIKE_REPORT__?.(),
     segments: Array.from(document.querySelectorAll("#segments li"), (item) => item.textContent),
     log: document.querySelector("#event-log")?.textContent,
   }));

@@ -1,5 +1,5 @@
-import VeritasApp from "@/components/veritas-app";
+import VerifyLiveApp from "@/components/verifylive-app";
 
 export default function Home() {
-  return <VeritasApp />;
+  return <VerifyLiveApp />;
 }

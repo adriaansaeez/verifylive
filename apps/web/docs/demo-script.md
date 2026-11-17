@@ -1,4 +1,4 @@
-# Guion de demo en vivo · Veritas Live (3 minutos)
+# Guion de demo en vivo · VerifyLive (3 minutos)
 
 Objetivo: mostrar que la app verifica en directo **sin inventar** y que distingue
 lo comprobado de lo provisional, lo opinable y lo simulado.
@@ -9,7 +9,7 @@ http://localhost:3000, volumen del sistema audible, `.env.local` cargado si hay
 
 ## 0:00 — Intro (20 s)
 
-> «Veritas Live escucha un discurso en español, detecta afirmaciones
+> «VerifyLive escucha un discurso en español, detecta afirmaciones
 > verificables y busca evidencia para cada una. La regla es simple: si no hay
 > evidencia suficiente, lo dice; no rellena huecos.»
 

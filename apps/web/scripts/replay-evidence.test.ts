@@ -8,7 +8,7 @@
  * Madrid Ourense inauguración" with four ticket shops, and that is exactly
  * what this harness shows or clears.
  *
- *   VERITAS_REPLAY=1 npx vitest run scripts/replay-evidence.test.ts
+ *   VERIFYLIVE_REPLAY=1 npx vitest run scripts/replay-evidence.test.ts
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -52,7 +52,7 @@ const SPANS = [
   "Una auditoría extraordinaria de seguridad de la línea Madrid Sevilla y también un compromiso.",
 ];
 
-const enabled = process.env.VERITAS_REPLAY === "1" && Boolean(process.env.NAN_KEY?.trim());
+const enabled = process.env.VERIFYLIVE_REPLAY === "1" && Boolean(process.env.NAN_KEY?.trim());
 
 function claimFrom(text: string, quote: string, queries: string[]): Claim {
   const now = new Date().toISOString();

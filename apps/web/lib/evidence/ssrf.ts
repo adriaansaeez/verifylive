@@ -11,7 +11,7 @@ export class UnsafeUrlError extends Error {
 const ALLOW_PRIVATE = new Set(["1", "true", "yes", "on"]);
 
 function allowPrivate(): boolean {
-  return ALLOW_PRIVATE.has((process.env.VERITAS_ALLOW_PRIVATE_NETWORK ?? "").toLowerCase());
+  return ALLOW_PRIVATE.has((process.env.VERIFYLIVE_ALLOW_PRIVATE_NETWORK ?? "").toLowerCase());
 }
 
 function isPrivateIPv4(address: string): boolean {

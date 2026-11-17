@@ -15,7 +15,7 @@ type WikiResponse = {
   query?: { pages?: WikiPage[] };
 };
 
-const USER_AGENT = "VeritasLive/0.1 (+https://github.com/adriaansaeez/veritas-live; evidence retrieval)";
+const USER_AGENT = "VerifyLive/0.1 (+https://github.com/adriaansaeez/verifylive; evidence retrieval)";
 
 export async function searchWikipedia(query: string, language = "es"): Promise<EvidenceCandidate[]> {
   const trimmed = query.trim();

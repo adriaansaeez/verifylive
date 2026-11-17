@@ -1,4 +1,4 @@
-# Veritas Live
+# VerifyLive
 
 Documentación técnica. La idea del proyecto y para qué sirve están en el
 [README principal](../../README.md); aquí está cómo funciona por dentro, qué se
@@ -34,7 +34,7 @@ app/api/                  Rutas HTTP (App Router)
   sessions/[id]/segments/ Añadir transcripciones
   sessions/[id]/finish/   Cerrar sesión
   sessions/[id]/stream/   SSE de eventos (segmentos, claims, veredictos)
-components/               UI: veritas-app, claim-card, evidence-drawer, format
+components/               UI: verifylive-app, claim-card, evidence-drawer, format
 lib/
   db/                     node:sqlite (Node >= 22) + repositorio
   claims/                 Buffer de frases + extractor determinista/chat opcional
@@ -50,7 +50,7 @@ scripts/probe-nan.ts      Diagnóstico de una llamada real a NaN/Clef
 - **Cola Clef**: una petición en vuelo como máximo; reintenta `429`, `502` y
   `504`; timeout de 50 s (`CLEF_TIMEOUT_MS`). Ver `lib/clef/queue.ts`.
 - **SSRF**: `lib/evidence/ssrf.ts` bloquea esquemas no HTTP(S), loopback y redes
-  privadas salvo que `VERITAS_ALLOW_PRIVATE_NETWORK=true`.
+  privadas salvo que `VERIFYLIVE_ALLOW_PRIVATE_NETWORK=true`.
 - **Protección de escritura**: los POST aceptan un token opcional para demos
   públicas y aplican cuotas en memoria por IP y sesión. Sin token configurado,
   el desarrollo local conserva el flujo directo.
@@ -115,7 +115,7 @@ scripts/probe-nan.ts      Diagnóstico de una llamada real a NaN/Clef
   y hasta entonces no hay consultas que lanzar, así que la cita literal se
   busca en paralelo y sus resultados entran como un conector más. Medido A/B
   sobre seis afirmaciones: la latencia baja de 5,3 s a 3,7 s de mediana y se
-  citan más fuentes, no menos. Se desactiva con `VERITAS_WARMUP_SEARCH=false`.
+  citan más fuentes, no menos. Se desactiva con `VERIFYLIVE_WARMUP_SEARCH=false`.
 - **Selección de fuentes**: el reranker semántico descarta por debajo de 0,3.
   Una fuente que responde a la afirmación puntúa entre 0,89 y 0,99, mientras que
   «Historia del ferrocarril en España» puntuaba 0,198 para una afirmación sobre
@@ -160,32 +160,32 @@ Sin `.env.local` la app arranca en modo simulado.
 | `NAN_RERANK_URL` | vacío | Endpoint de rerank opcional. |
 | `NAN_RERANK_MODEL` | vacío | Modelo de rerank. Ambos vacíos = ranker local. |
 | `JINA_API_KEY` | vacío | Jina Reader para evidencia web. |
-| `VERITAS_SEARXNG_URL` | vacío | SearXNG autoalojado (`npm run search:up` lo deja en `http://localhost:8099`). Es el mejor buscador medido y no necesita claves. |
-| `VERITAS_SEARXNG_LANGUAGE` | `es` | Idioma que se le pide a SearXNG. |
-| `VERITAS_SEARXNG_RESULTS` | `8` | Resultados que se le piden por consulta. |
-| `VERITAS_WARMUP_SEARCH` | `true` | Busca la cita literal mientras se normaliza la afirmación. `false` lo desactiva. |
-| `VERITAS_SEARCH_PROVIDER` | auto | `auto`, `searxng`, `google`, `brave`, `bingnews`, `bing`, `gdelt` o `none`. `auto` usa SearXNG si está configurado, luego Google o Brave si hay clave, y si no `bingnews`. |
+| `VERIFYLIVE_SEARXNG_URL` | vacío | SearXNG autoalojado (`npm run search:up` lo deja en `http://localhost:8099`). Es el mejor buscador medido y no necesita claves. |
+| `VERIFYLIVE_SEARXNG_LANGUAGE` | `es` | Idioma que se le pide a SearXNG. |
+| `VERIFYLIVE_SEARXNG_RESULTS` | `8` | Resultados que se le piden por consulta. |
+| `VERIFYLIVE_WARMUP_SEARCH` | `true` | Busca la cita literal mientras se normaliza la afirmación. `false` lo desactiva. |
+| `VERIFYLIVE_SEARCH_PROVIDER` | auto | `auto`, `searxng`, `google`, `brave`, `bingnews`, `bing`, `gdelt` o `none`. `auto` usa SearXNG si está configurado, luego Google o Brave si hay clave, y si no `bingnews`. |
 | `GOOGLE_API_KEY` + `GOOGLE_CSE_ID` | vacío | Google Custom Search (API oficial, 100 consultas/día gratis). |
 | `BRAVE_SEARCH_API_KEY` | vacío | Brave Search API (2.000 consultas/mes gratis). |
-| `VERITAS_ENABLE_WIKIPEDIA` | `true` | Wikipedia del lado servidor. |
-| `VERITAS_ALLOW_PRIVATE_NETWORK` | `false` | Desactiva el guard SSRF (solo desarrollo). |
-| `VERITAS_DB` | `~/.cache/veritas-live/veritas.sqlite` | Ruta de SQLite. Vive fuera del proyecto a propósito: si está dentro, cada escritura dispara un recompilado de Turbopack y la página entra en bucle de recarga. |
-| `VERITAS_API_TOKEN` | vacío | Token opcional para POST mutantes. Vacío no exige login; para una demo pública usa un secreto largo. |
-| `VERITAS_TRUST_PROXY` | `false` | Usa `X-Forwarded-For`/`X-Real-IP` para la cuota solo si el proxy los sanea. |
-| `VERITAS_RATE_WINDOW_MS` | `60000` | Ventana de las cuotas MVP en memoria. |
-| `VERITAS_RATE_IP_LIMIT` | `120` | Máximo por ventana, IP y tipo de operación. |
-| `VERITAS_RATE_SESSION_LIMIT` | `90` | Máximo por ventana, sesión y tipo de operación. |
-| `VERITAS_ACCESS_ATTEMPT_LIMIT` | `10` | Intentos de validar el token por IP; la ventana es de 15 min como mínimo. |
+| `VERIFYLIVE_ENABLE_WIKIPEDIA` | `true` | Wikipedia del lado servidor. |
+| `VERIFYLIVE_ALLOW_PRIVATE_NETWORK` | `false` | Desactiva el guard SSRF (solo desarrollo). |
+| `VERIFYLIVE_DB` | `~/.cache/verifylive/verifylive.sqlite` | Ruta de SQLite. Vive fuera del proyecto a propósito: si está dentro, cada escritura dispara un recompilado de Turbopack y la página entra en bucle de recarga. |
+| `VERIFYLIVE_API_TOKEN` | vacío | Token opcional para POST mutantes. Vacío no exige login; para una demo pública usa un secreto largo. |
+| `VERIFYLIVE_TRUST_PROXY` | `false` | Usa `X-Forwarded-For`/`X-Real-IP` para la cuota solo si el proxy los sanea. |
+| `VERIFYLIVE_RATE_WINDOW_MS` | `60000` | Ventana de las cuotas MVP en memoria. |
+| `VERIFYLIVE_RATE_IP_LIMIT` | `120` | Máximo por ventana, IP y tipo de operación. |
+| `VERIFYLIVE_RATE_SESSION_LIMIT` | `90` | Máximo por ventana, sesión y tipo de operación. |
+| `VERIFYLIVE_ACCESS_ATTEMPT_LIMIT` | `10` | Intentos de validar el token por IP; la ventana es de 15 min como mínimo. |
 | `NEXT_PUBLIC_WHISPER_LANGUAGE` | `es` | Idioma del transcriptor. |
 
 Nota: el endpoint de Clef (`https://api.nan.builders/v1/systemone`) está fijado
 en `lib/config.ts`; `NAN_BASE_URL` solo afecta al script de diagnóstico.
 
-Para una demo pública, define `VERITAS_API_TOKEN` solo en el servidor. El
+Para una demo pública, define `VERIFYLIVE_API_TOKEN` solo en el servidor. El
 usuario lo introduce en «Token de demo pública»: `/api/access` lo valida y
 devuelve una cookie `HttpOnly`, sin incluir el secreto ni su valor configurado
 en `/api/config`. Los clientes no navegador también pueden enviar
-`Authorization: Bearer <token>` o `X-Veritas-Token`. El limitador es deliberadamente
+`Authorization: Bearer <token>` o `X-VerifyLive-Token`. El limitador es deliberadamente
 MVP y por proceso; en despliegues con varias réplicas debe sustituirse por un
 almacén compartido.
 
@@ -225,7 +225,7 @@ Para levantarlo:
 
 ```bash
 npm run search:up      # SearXNG en http://localhost:8099
-echo 'VERITAS_SEARXNG_URL=http://localhost:8099' >> .env.local
+echo 'VERIFYLIVE_SEARXNG_URL=http://localhost:8099' >> .env.local
 npm run search:down    # cuando acabes
 ```
 
@@ -272,9 +272,9 @@ produjo de verdad sobre una pestaña de YouTube, con sus repeticiones y su
 ruido. Los dos bancos llaman a NaN y a la red, así que `npm test` los salta:
 
 ```bash
-VERITAS_REPLAY=1 npx vitest run scripts/replay-detection.test.ts --disable-console-intercept
-VERITAS_REPLAY=1 npx vitest run scripts/replay-evidence.test.ts --disable-console-intercept
-VERITAS_REPLAY=1 npx vitest run scripts/replay-publishers.test.ts --disable-console-intercept
+VERIFYLIVE_REPLAY=1 npx vitest run scripts/replay-detection.test.ts --disable-console-intercept
+VERIFYLIVE_REPLAY=1 npx vitest run scripts/replay-evidence.test.ts --disable-console-intercept
+VERIFYLIVE_REPLAY=1 npx vitest run scripts/replay-publishers.test.ts --disable-console-intercept
 ```
 
 El primero vuelve a pasar la transcripción por la ventana y el gate e imprime

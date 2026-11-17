@@ -7,7 +7,7 @@
  * thirteen claims that depended only on "other" sources were in fact backed by
  * real newspapers.
  *
- *   VERITAS_REPLAY=1 npx vitest run scripts/replay-publishers.test.ts
+ *   VERIFYLIVE_REPLAY=1 npx vitest run scripts/replay-publishers.test.ts
  */
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -83,7 +83,7 @@ const EXPECTED: [string, PublisherTier][] = [
   ["barriosalvadormadrid.com", "other"],
 ];
 
-const enabled = process.env.VERITAS_REPLAY === "1" && Boolean(process.env.NAN_KEY?.trim());
+const enabled = process.env.VERIFYLIVE_REPLAY === "1" && Boolean(process.env.NAN_KEY?.trim());
 
 describe.skipIf(!enabled)("publisher classification", () => {
   it(

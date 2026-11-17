@@ -1,10 +1,10 @@
 # Spike: Parakeet local en el navegador
 
-Este harness responde una pregunta antes de construir Veritas Live: ¿puede un navegador de escritorio descargar Parakeet TDT 0.6B v3 una vez y transcribir audio español con retraso suficientemente bajo para seguir un vídeo en directo?
+Este harness responde una pregunta antes de construir VerifyLive: ¿puede un navegador de escritorio descargar Parakeet TDT 0.6B v3 una vez y transcribir audio español con retraso suficientemente bajo para seguir un vídeo en directo?
 
 ## Resultado
 
-El usuario no instala Hex ni otra aplicación. La web descarga el modelo, lo guarda en OPFS y procesa el audio localmente. El backend de Veritas recibirá únicamente segmentos de texto y timestamps.
+El usuario no instala Hex ni otra aplicación. La web descarga el modelo, lo guarda en OPFS y procesa el audio localmente. El backend de VerifyLive recibirá únicamente segmentos de texto y timestamps.
 
 El benchmark en el portátil de desarrollo dio **3,66 s de carga desde caché** y procesó **32,58 s de español en 649 ms (50,18× tiempo real)**. La descarga inicial tardó 133,61 s y ocupó 1,257 GB. La captura automatizada de pestaña quedó bloqueada por macOS y conserva una puerta de prueba manual. El detalle y la decisión están en [`RESULTS.md`](RESULTS.md).
 
@@ -83,7 +83,7 @@ Para medir únicamente descarga, carga y caché de Parakeet en un perfil persist
 npm run benchmark:model
 ```
 
-Por defecto usa fp16, conserva la caché en `/tmp/veritas-parakeet-chrome-profile` y espera hasta 15 minutos. Se puede cambiar con `SPIKE_QUANTIZATION`, `SPIKE_PROFILE` y `SPIKE_TIMEOUT_MS`.
+Por defecto usa fp16, conserva la caché en `/tmp/verifylive-parakeet-chrome-profile` y espera hasta 15 minutos. Se puede cambiar con `SPIKE_QUANTIZATION`, `SPIKE_PROFILE` y `SPIKE_TIMEOUT_MS`.
 
 Con un archivo ya disponible, el benchmark automatizado de inferencia reutiliza el mismo perfil:
 

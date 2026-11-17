@@ -1,10 +1,10 @@
-# Buscador local de Veritas Live.
+# Buscador local de VerifyLive.
 #
 #   npm run search:up     arranca SearXNG en http://localhost:8099
 #   npm run search:down   lo para
 #
 # Después añade a .env.local:
-#   VERITAS_SEARXNG_URL=http://localhost:8099
+#   VERIFYLIVE_SEARXNG_URL=http://localhost:8099
 #
 # Sin esto la app sigue funcionando: cae al RSS de Bing Noticias, sin claves.
 services:
@@ -12,7 +12,7 @@ services:
     # Versión fijada: `latest` cambia a diario y con él la calidad de las
     # búsquedas, que es justo lo que no queremos que se mueva solo.
     image: searxng/searxng:2026.11.15-2d500cb6b
-    container_name: veritas-searxng
+    container_name: verifylive-searxng
     ports:
       - "127.0.0.1:8099:8080"
     volumes:

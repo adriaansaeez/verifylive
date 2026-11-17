@@ -10,12 +10,12 @@
  * cada ficha, así que se anota por proveedor y se deja de preguntar.
  */
 type Retired = Record<string, string>;
-type GlobalWithState = typeof globalThis & { __veritasRetired?: Retired };
+type GlobalWithState = typeof globalThis & { __verifyliveRetired?: Retired };
 
 function store(): Retired {
   const global = globalThis as GlobalWithState;
-  global.__veritasRetired ??= {};
-  return global.__veritasRetired;
+  global.__verifyliveRetired ??= {};
+  return global.__verifyliveRetired;
 }
 
 export function retiredReason(id: string): string | null {
@@ -32,5 +32,5 @@ export function retiredProviders(): Retired {
 
 /** Solo para las pruebas: olvida los diagnósticos. */
 export function resetAvailability(): void {
-  delete (globalThis as GlobalWithState).__veritasRetired;
+  delete (globalThis as GlobalWithState).__verifyliveRetired;
 }

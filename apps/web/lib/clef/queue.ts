@@ -117,12 +117,12 @@ class ClefQueue {
   }
 }
 
-type GlobalWithQueue = typeof globalThis & { __veritasClefQueue?: ClefQueue };
+type GlobalWithQueue = typeof globalThis & { __verifyliveClefQueue?: ClefQueue };
 
 export function getClefQueue(): ClefQueue {
   const store = globalThis as GlobalWithQueue;
-  store.__veritasClefQueue ??= new ClefQueue();
-  return store.__veritasClefQueue;
+  store.__verifyliveClefQueue ??= new ClefQueue();
+  return store.__verifyliveClefQueue;
 }
 
 export const clefQueue = getClefQueue();

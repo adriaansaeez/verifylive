@@ -74,19 +74,19 @@ describe("searxngBaseUrl", () => {
   });
 
   it("normalises a configured origin", () => {
-    vi.stubEnv("VERITAS_SEARXNG_URL", "http://localhost:8099/");
+    vi.stubEnv("VERIFYLIVE_SEARXNG_URL", "http://localhost:8099/");
     expect(searxngBaseUrl()).toBe("http://localhost:8099");
   });
 
   it("ignores a malformed value instead of failing the claim", () => {
-    vi.stubEnv("VERITAS_SEARXNG_URL", "no-es-una-url");
+    vi.stubEnv("VERIFYLIVE_SEARXNG_URL", "no-es-una-url");
     expect(searxngBaseUrl()).toBeNull();
   });
 });
 
 describe("searchSearxng", () => {
   it("asks for JSON in Spanish and trusts only the configured origin", async () => {
-    vi.stubEnv("VERITAS_SEARXNG_URL", "http://localhost:8099");
+    vi.stubEnv("VERIFYLIVE_SEARXNG_URL", "http://localhost:8099");
     vi.mocked(safeFetchText).mockResolvedValue({
       url: "http://localhost:8099/search",
       contentType: "application/json",
@@ -110,7 +110,7 @@ describe("searchSearxng", () => {
   });
 
   it("returns nothing when the instance answers something that is not JSON", async () => {
-    vi.stubEnv("VERITAS_SEARXNG_URL", "http://localhost:8099");
+    vi.stubEnv("VERIFYLIVE_SEARXNG_URL", "http://localhost:8099");
     vi.mocked(safeFetchText).mockResolvedValue({
       url: "http://localhost:8099/search",
       contentType: "text/html",

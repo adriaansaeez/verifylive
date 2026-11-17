@@ -1,11 +1,11 @@
-![Portada de Veritas Live: la silueta de un juez, el nombre y el lema «Que no te la cuelen».](brand/veritas-cover.png)
+![Portada de VerifyLive: la silueta de un juez, el nombre y el lema «Que no te la cuelen».](brand/verifylive-cover.png)
 
-# Veritas Live
+# VerifyLive
 
 **Que no te la cuelen.**
 
 Pon un debate, un mitin, una entrevista o cualquier vídeo donde alguien hable.
-Veritas lo escucha, separa lo que es una afirmación comprobable de lo que es
+VerifyLive lo escucha, separa lo que es una afirmación comprobable de lo que es
 ruido, la busca en prensa y en fuentes oficiales, y te enseña en pantalla, en el
 momento, si hay algo que la respalde o que la desmienta. Con el enlace, para que
 lo mires tú.
@@ -22,7 +22,7 @@ comprobar sobre la marcha. Para cuando alguien verifica aquel «hemos
 multiplicado por veinte la inversión», el debate terminó hace tres días y el
 titular ya lo leyó todo el mundo.
 
-Veritas hace esa comprobación mientras la frase todavía está en el aire. No
+VerifyLive hace esa comprobación mientras la frase todavía está en el aire. No
 sustituye a un periodista: le quita de encima el trabajo mecánico de pillar la
 afirmación, buscarla y ponerle una fuente al lado.
 
@@ -32,7 +32,7 @@ Esto es lo que separa una herramienta útil de un juguete que da la razón al qu
 lo usa.
 
 **No es una máquina de la verdad.** Un detector de mentiras que acierta siempre
-no existe, y el que diga tenerlo miente más que el político. Veritas no dice
+no existe, y el que diga tenerlo miente más que el político. VerifyLive no dice
 «esto es mentira»: dice «estas tres fuentes contradicen lo que acaba de decir»,
 y te las enseña.
 
@@ -42,7 +42,7 @@ Preferimos quedarnos cortos a colar una certeza que no tenemos.
 
 **No confunde una opinión con un dato.** «La sanidad va a peor» no es
 comprobable, por mucho que se diga con énfasis. «Hemos invertido 19.000 millones
-desde 2026» sí lo es. Veritas solo entra al segundo tipo de frase, y lo decide
+desde 2026» sí lo es. VerifyLive solo entra al segundo tipo de frase, y lo decide
 preguntándole al modelo si dos periodistas con las mismas fuentes delante
 llegarían a la misma conclusión.
 
@@ -51,7 +51,7 @@ habla. Si la afirmación de tu partido está respaldada, lo dirá igual.
 
 ## Qué ves en pantalla
 
-![Veritas Live en directo: el vídeo encajado en su columna, la transcripción debajo y las afirmaciones con su veredicto en color a la derecha.](assets/flow.png)
+![VerifyLive en directo: el vídeo encajado en su columna, la transcripción debajo y las afirmaciones con su veredicto en color a la derecha.](assets/flow.png)
 
 Arriba a la izquierda, el vídeo. Debajo, lo que se está diciendo, transcrito en
 tu propio ordenador. A la derecha, una ficha por cada afirmación que merece
@@ -222,7 +222,7 @@ TYPESAFE_API_KEY=tu-key          # Jev, en console.typesafe.ai
 
 # opcional: buscador autoalojado (mejor evidencia sin claves)
 npm run search:up
-VERITAS_SEARXNG_URL=http://localhost:8099
+VERIFYLIVE_SEARXNG_URL=http://localhost:8099
 ```
 
 La app necesita COOP/COEP para WebGPU y `SharedArrayBuffer`; `next.config.ts`
@@ -264,8 +264,8 @@ captura real, que requieren red y `NAN_KEY`). Los replay tests se ejecutan
 explícitamente:
 
 ```bash
-VERITAS_REPLAY=1 npx vitest run scripts/replay-detection.test.ts --disable-console-intercept
-VERITAS_REPLAY=1 npx vitest run scripts/replay-evidence.test.ts --disable-console-intercept
+VERIFYLIVE_REPLAY=1 npx vitest run scripts/replay-detection.test.ts --disable-console-intercept
+VERIFYLIVE_REPLAY=1 npx vitest run scripts/replay-evidence.test.ts --disable-console-intercept
 ```
 
 El primer banco vuelve a pasar 56 segmentos reales de Parakeet por la ventana y

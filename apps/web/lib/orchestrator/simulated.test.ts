@@ -5,19 +5,19 @@ import { join } from "node:path";
 
 let dir: string;
 beforeEach(() => {
-  dir = mkdtempSync(join(tmpdir(), "veritas-sim-"));
-  process.env.VERITAS_DB = join(dir, "sim.sqlite");
-  delete (globalThis as { __veritasDb?: unknown }).__veritasDb;
+  dir = mkdtempSync(join(tmpdir(), "verifylive-sim-"));
+  process.env.VERIFYLIVE_DB = join(dir, "sim.sqlite");
+  delete (globalThis as { __verifyliveDb?: unknown }).__verifyliveDb;
   // Modo simulado: sin clave de NaN.
   vi.stubEnv("NAN_KEY", "");
   vi.stubEnv("NAN_CHAT_MODEL", "");
-  vi.stubEnv("VERITAS_SEARXNG_URL", "");
-  vi.stubEnv("VERITAS_SEARCH_PROVIDER", "none");
-  vi.stubEnv("VERITAS_ENABLE_WIKIPEDIA", "false");
+  vi.stubEnv("VERIFYLIVE_SEARXNG_URL", "");
+  vi.stubEnv("VERIFYLIVE_SEARCH_PROVIDER", "none");
+  vi.stubEnv("VERIFYLIVE_ENABLE_WIKIPEDIA", "false");
 });
 afterEach(() => {
-  delete (globalThis as { __veritasDb?: unknown }).__veritasDb;
-  delete process.env.VERITAS_DB;
+  delete (globalThis as { __verifyliveDb?: unknown }).__verifyliveDb;
+  delete process.env.VERIFYLIVE_DB;
   vi.unstubAllEnvs();
   rmSync(dir, { recursive: true, force: true });
 });

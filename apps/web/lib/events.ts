@@ -4,20 +4,20 @@ import { clefQueue } from "@/lib/clef/queue";
 type Listener = (event: SessionEvent) => void;
 
 type GlobalWithBus = typeof globalThis & {
-  __veritasBus?: Map<string, Set<Listener>>;
-  __veritasQueueHooked?: boolean;
+  __verifyliveBus?: Map<string, Set<Listener>>;
+  __verifyliveQueueHooked?: boolean;
 };
 
 function listeners(): Map<string, Set<Listener>> {
   const store = globalThis as GlobalWithBus;
-  store.__veritasBus ??= new Map();
-  return store.__veritasBus;
+  store.__verifyliveBus ??= new Map();
+  return store.__verifyliveBus;
 }
 
 function hookQueue(): void {
   const store = globalThis as GlobalWithBus;
-  if (store.__veritasQueueHooked) return;
-  store.__veritasQueueHooked = true;
+  if (store.__verifyliveQueueHooked) return;
+  store.__verifyliveQueueHooked = true;
   clefQueue.onChange((queue) => {
     for (const sessionId of listeners().keys()) {
       publish(sessionId, { type: "queue.updated", queue });
