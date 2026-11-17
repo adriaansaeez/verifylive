@@ -22,12 +22,23 @@ const SENTENCE_END = /[.!?…]["'»”)]?\s*$/u;
  *
  * Spans end either at the newest part or at a part that closes a sentence, so
  * a claim completed mid-window is still reachable once filler follows it.
+ *
+ * Un tramo que acaba en la parte más reciente SIN cerrar frase se está
+ * juzgando antes de que el hablante termine, y así se publicaba «Yo he
+ * inaugurado pues el ave madrid» como afirmación, dejando «Ourense el ave
+ * madrid murcia» para otra ficha. Esos tramos esperan al siguiente segmento,
+ * salvo que ya no puedan crecer más: entonces hay que juzgarlos igual.
  */
 export class ClaimWindow {
   private parts: Array<ClaimWindowPart & { partId: number }> = [];
   private nextPartId = 0;
 
-  constructor(private readonly maxParts = 6) {}
+  /** Nunca mayor que la ventana: si no, el escape de abajo es inalcanzable. */
+  private readonly maxSpan: number;
+
+  constructor(private readonly maxParts = 6) {
+    this.maxSpan = Math.min(MAX_SPAN_PARTS, maxParts);
+  }
 
   append(input: ClaimWindowPart): ClaimCandidate[] {
     const text = input.text.replace(/\s+/g, " ").trim();
@@ -50,13 +61,17 @@ export class ClaimWindow {
   candidates(): ClaimCandidate[] {
     const output: ClaimCandidate[] = [];
     const seen = new Set<string>();
+    const newest = this.parts.length - 1;
     for (const end of this.endIndexes()) {
-      const lowest = Math.max(0, end - (MAX_SPAN_PARTS - 1));
+      const openEnd = end === newest && !SENTENCE_END.test(this.parts[end]?.text ?? "");
+      const lowest = Math.max(0, end - (this.maxSpan - 1));
       for (let start = end; start >= lowest; start -= 1) {
         const selected = this.parts.slice(start, end + 1);
         const first = selected[0];
         const last = selected.at(-1);
         if (!first || !last) continue;
+        // Aún puede crecer con el segmento siguiente: no lo juzgues todavía.
+        if (openEnd && selected.length < this.maxSpan) continue;
         const text = selected.map((part) => part.text).join(" ");
         if (seen.has(text)) continue;
         seen.add(text);

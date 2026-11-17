@@ -37,7 +37,19 @@ describe("ClaimWindow", () => {
     for (let index = 0; index < 5; index += 1) {
       window.append({ text: `fragmento ${index}`, startMs: index, endMs: index + 1 });
     }
-    expect(window.candidates()[2]?.text).toBe("fragmento 2 fragmento 3 fragmento 4");
+    // Sin puntuación el final nunca cierra, así que solo se ofrece el tramo
+    // más largo: los más cortos comparten ese mismo final a medias.
+    expect(window.candidates()).toHaveLength(1);
+    expect(window.candidates()[0]?.text).toBe("fragmento 2 fragmento 3 fragmento 4");
+  });
+
+  it("no juzga un tramo que todavía puede crecer", () => {
+    const window = new ClaimWindow();
+    // Acaba en el borde vivo y sin cerrar frase: el hablante sigue.
+    expect(window.append({ text: "Yo he inaugurado pues el ave madrid", startMs: 0, endMs: 1 })).toHaveLength(0);
+    // Al cerrarse la frase, el tramo completo ya se puede juzgar.
+    const after = window.append({ text: "Ourense y el ave madrid murcia.", startMs: 1, endMs: 2 });
+    expect(after.some((c) => c.text.includes("Ourense") && c.text.includes("inaugurado"))).toBe(true);
   });
 
   it("keeps text after a selected span for the next decision", () => {
