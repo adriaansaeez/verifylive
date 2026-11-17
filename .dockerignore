@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+brand
+assets
+examples
+spikes
+docs
+*.mp4

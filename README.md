@@ -244,6 +244,29 @@ las añade, con COEP en `credentialless` para que el reproductor incrustado
 cargue sin perder el aislamiento de origen. Si la sirves detrás de otro proxy,
 replícalas tal cual.
 
+## Desplegarlo en NaN Cloud
+
+Hay un `Dockerfile` en la raíz, que es lo que pide la plataforma. En
+cloud.nan.builders creas un Space, conectas el repositorio y marcas **Expose
+over HTTP** en el **puerto 3000**.
+
+Tres ajustes que no son opcionales:
+
+| Ajuste | Valor | Por qué |
+|---|---|---|
+| **Réplicas** | **1** | La cola del evaluador y el bus de eventos viven en el proceso. Con dos réplicas, el navegador se conecta a una y las fichas se generan en la otra: la pantalla se queda vacía. |
+| **Almacenamiento** | un volumen en `/data` | La base de datos vive ahí. Sin volumen, cada despliegue borra las sesiones. |
+| **Variables** | `NAN_KEY` o `TYPESAFE_API_KEY` | Sin ninguna arranca en modo simulado y lo etiqueta como tal. |
+
+El buscador autoalojado no viaja en esta imagen. Sin él la app usa el
+buscador sin clave, que encuentra menos fuentes relevantes; si quieres
+SearXNG, despliégalo como una segunda app del Space y apunta
+`VERIFYLIVE_SEARXNG_URL` a su dirección interna.
+
+Las cabeceras COOP/COEP las pone Next en cada respuesta, así que no hace
+falta configurarlas en la plataforma. Y recuerda que quien lo use necesita
+Chrome o Edge: la transcripción corre en su navegador, no en el servidor.
+
 ## Cómo usarlo
 
 Abre http://localhost:3000 y elige por dónde entra el audio:
